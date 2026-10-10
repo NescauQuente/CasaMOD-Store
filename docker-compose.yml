@@ -1,0 +1,67 @@
+name: casamod-store
+services:
+  casamod-store:
+    container_name: casamod-store
+    image: ghcr.io/nescauquente/casamod-store:latest
+    ports:
+      - target: 8418
+        published: "8418"
+        protocol: tcp
+    volumes:
+      # CasaMOD folders: mods go to mod/, wallpapers to mod/wallpapers/.
+      - type: bind
+        source: /DATA/AppData/casamod
+        target: /DATA/AppData/casamod
+      # Settings, GitHub token and the list of installed items.
+      - type: bind
+        source: /DATA/AppData/casamod-store
+        target: /DATA/AppData/casamod-store
+      # Used only to restart the CasaMOD container after mods are added or removed.
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    network_mode: bridge
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          memory: 16M
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm
+    - arm64
+  main: casamod-store
+  store_app_id: casamod-store
+  category: Developer
+  author: NescauQuente
+  developer: NescauQuente
+  icon: https://cdn.jsdelivr.net/gh/NescauQuente/CasaMOD-Store@main/icon.png
+  description:
+    en_us: A store for CasaMOD. Install, update and remove CasaMOD mods and wallpapers straight from GitHub, choose per item whether updates are applied automatically or only announced, and get a small notice on the CasaOS desktop when updates are waiting. Requires CasaMOD.
+    pt_br: Uma loja para o CasaMOD. Instale, atualize e remova mods e wallpapers do CasaMOD direto do GitHub, escolha por item se as atualizações são aplicadas sozinhas ou só avisadas, e receba um aviso discreto na área de trabalho do CasaOS quando houver atualizações. Requer o CasaMOD.
+    zh_cn: CasaMOD 商店。直接从 GitHub 安装、更新和删除 CasaMOD 模组与壁纸，可为每一项选择自动更新或仅提醒，有更新时在 CasaOS 桌面显示提示。需要先安装 CasaMOD。
+  tagline:
+    en_us: Mods and wallpapers for CasaMOD, always up to date
+    pt_br: Mods e wallpapers para o CasaMOD, sempre atualizados
+    zh_cn: CasaMOD 的模组与壁纸，始终保持最新
+  title:
+    en_us: CasaMOD Store
+  tips:
+    before_install:
+      en_us: |
+        **CasaMOD must be installed first** ([CasaMOD](https://github.com/Cp0204/CasaMOD)).
+
+        This app mounts the **Docker socket** (`/var/run/docker.sock`). It only uses it to restart the `casamod` container after a mod is added or removed, but access to the socket gives a container full control of Docker on this machine. If you prefer, remove that volume: the store keeps working and asks you to restart CasaMOD yourself.
+
+        The web UI has no login: keep port 8418 inside your local network.
+      pt_br: |
+        **O CasaMOD precisa estar instalado antes** ([CasaMOD](https://github.com/Cp0204/CasaMOD)).
+
+        Este app monta o **socket do Docker** (`/var/run/docker.sock`). Ele só é usado para reiniciar o container `casamod` depois que um mod é adicionado ou removido, mas o acesso ao socket dá a um container controle total do Docker nesta máquina. Se preferir, remova esse volume: a loja continua funcionando e pede para você reiniciar o CasaMOD manualmente.
+
+        A interface web não tem login: mantenha a porta 8418 apenas na sua rede local.
+  port_map: "8418"
+  scheme: http
+  index: /

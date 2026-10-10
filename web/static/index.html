@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CasaMOD Store</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon.svg" alt="" width="32" height="32">
+      <div>
+        <h1>CasaMOD Store</h1>
+        <span class="version" id="version"></span>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <a href="#store" data-tab="store" data-i18n="tab.store">Store</a>
+      <a href="#installed" data-tab="installed"><span data-i18n="tab.installed">Installed</span> <span class="count" id="count-installed"></span></a>
+      <a href="#updates" data-tab="updates"><span data-i18n="tab.updates">Updates</span> <span class="count accent" id="count-updates"></span></a>
+      <a href="#settings" data-tab="settings" data-i18n="tab.settings">Settings</a>
+    </nav>
+  </header>
+
+  <div id="banners"></div>
+  <div id="busy" class="busy" hidden><span class="spinner"></span><span id="busy-text"></span></div>
+
+  <main>
+    <!-- Store -->
+    <section id="tab-store" class="tab" hidden>
+      <div class="toolbar">
+        <input type="search" id="search" data-i18n-placeholder="store.search" placeholder="Search mods and wallpapers">
+        <div class="chips" id="type-filter">
+          <button class="chip active" data-type="" data-i18n="filter.all">All</button>
+          <button class="chip" data-type="mod" data-i18n="filter.mods">Mods</button>
+          <button class="chip" data-type="wallpaper" data-i18n="filter.wallpapers">Wallpapers</button>
+        </div>
+        <select id="source-filter"><option value="" data-i18n="filter.allSources">All sources</option></select>
+        <div class="spacer"></div>
+        <button class="btn" id="btn-refresh-store" data-i18n="store.refresh">Refresh</button>
+        <button class="btn primary" id="btn-add-url" data-i18n="store.addUrl">Add from GitHub URL</button>
+      </div>
+      <div id="source-errors"></div>
+      <div class="selection-bar" id="selection-bar" hidden>
+        <span id="selection-text"></span>
+        <button class="btn" id="btn-clear-selection" data-i18n="store.clearSelection">Clear</button>
+        <button class="btn primary" id="btn-install-selected" data-i18n="store.installSelected">Install selected</button>
+      </div>
+      <div class="grid" id="store-grid"></div>
+      <p class="empty" id="store-empty" hidden data-i18n="store.empty">Nothing found.</p>
+    </section>
+
+    <!-- Installed -->
+    <section id="tab-installed" class="tab" hidden>
+      <h2 data-i18n="installed.title">Installed by the store</h2>
+      <div class="list" id="installed-list"></div>
+      <p class="empty" id="installed-empty" hidden data-i18n="installed.empty">Nothing installed by the store yet.</p>
+      <h2 data-i18n="manual.title">Installed manually</h2>
+      <p class="hint" data-i18n="manual.hint">These folders were not installed by the store, so it never changes or removes them.</p>
+      <div class="list" id="manual-list"></div>
+      <p class="empty" id="manual-empty" hidden data-i18n="manual.empty">None.</p>
+    </section>
+
+    <!-- Updates -->
+    <section id="tab-updates" class="tab" hidden>
+      <div class="toolbar">
+        <div class="check-info" id="check-info"></div>
+        <div class="spacer"></div>
+        <button class="btn" id="btn-check" data-i18n="updates.check">Check now</button>
+        <button class="btn primary" id="btn-update-all" data-i18n="updates.updateAll">Update all</button>
+      </div>
+      <div class="list" id="updates-list"></div>
+      <p class="empty" id="updates-empty" hidden data-i18n="updates.empty">Everything is up to date.</p>
+      <h2 data-i18n="log.title">Activity</h2>
+      <ul class="log" id="log"></ul>
+    </section>
+
+    <!-- Settings -->
+    <section id="tab-settings" class="tab" hidden>
+      <form id="settings-form" class="settings" autocomplete="off">
+        <fieldset>
+          <legend data-i18n="settings.github">GitHub</legend>
+          <label for="set-token" data-i18n="settings.token">Access token (optional)</label>
+          <div class="row">
+            <input type="password" id="set-token" placeholder="ghp_… / github_pat_…">
+            <button type="button" class="btn" id="btn-clear-token" data-i18n="settings.clearToken">Remove token</button>
+          </div>
+          <p class="hint"><span id="token-state"></span> <span data-i18n="settings.tokenHint">Needed for private repositories and to raise the API limit from 60 to 5000 requests per hour. A fine-grained token with read-only "Contents" access is enough. It is stored only in this container.</span></p>
+          <label for="set-catalogs" data-i18n="settings.catalogs">Catalogs (one per line)</label>
+          <textarea id="set-catalogs" rows="3" spellcheck="false"></textarea>
+          <p class="hint" data-i18n="settings.catalogsHint">A store.json file in a GitHub repository: owner/repo, a GitHub URL, or a raw URL.</p>
+          <label class="check"><input type="checkbox" id="set-casamod-mods"> <span data-i18n="settings.casamodMods">Show the mods that come with CasaMOD</span></label>
+        </fieldset>
+        <fieldset>
+          <legend data-i18n="settings.updates">Updates</legend>
+          <label for="set-interval" data-i18n="settings.interval">Check every (hours, 0 = never)</label>
+          <input type="number" id="set-interval" min="0" max="720" step="0.5">
+          <label class="check"><input type="checkbox" id="set-notifier"> <span data-i18n="settings.notifier">Show a notice on the CasaOS desktop when updates are waiting</span></label>
+          <label for="set-public-url" data-i18n="settings.publicUrl">Store address used by the notice (optional)</label>
+          <input type="url" id="set-public-url" placeholder="http://casaos.local:8418">
+          <label for="set-port" data-i18n="settings.port">Store port (used when the address is empty)</label>
+          <input type="number" id="set-port" min="1" max="65535">
+        </fieldset>
+        <fieldset>
+          <legend>CasaMOD</legend>
+          <label for="set-container" data-i18n="settings.container">CasaMOD container name</label>
+          <input type="text" id="set-container">
+          <p class="hint" data-i18n="settings.containerHint">Restarted after a mod is added or removed, so CasaMOD loads it.</p>
+          <div class="row"><button type="button" class="btn" id="btn-restart" data-i18n="settings.restartNow">Restart CasaMOD now</button></div>
+        </fieldset>
+        <div class="row end"><button type="submit" class="btn primary" id="btn-save-settings" data-i18n="settings.save">Save</button></div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Add from URL -->
+  <dialog id="dlg-url">
+    <form method="dialog" id="url-form">
+      <h3 data-i18n="url.title">Add from GitHub</h3>
+      <label for="url-input" data-i18n="url.url">Repository or folder URL</label>
+      <div class="row">
+        <input type="text" id="url-input" placeholder="https://github.com/owner/repo/tree/main/my-mod" spellcheck="false">
+        <button type="button" class="btn" id="btn-resolve" data-i18n="url.read">Read</button>
+      </div>
+      <div id="url-details" hidden>
+        <div class="two">
+          <div><label for="url-repo" data-i18n="url.repo">Repository</label><input type="text" id="url-repo"></div>
+          <div><label for="url-branch" data-i18n="url.branch">Branch (empty = default)</label><input type="text" id="url-branch"></div>
+        </div>
+        <label for="url-path" data-i18n="url.path">Folder in the repository (empty = root)</label>
+        <input type="text" id="url-path">
+        <div class="two">
+          <div><label for="url-id" data-i18n="url.id">Folder name (id)</label><input type="text" id="url-id"></div>
+          <div><label for="url-type" data-i18n="url.type">Type</label>
+            <select id="url-type"><option value="mod" data-i18n="type.mod">Mod</option><option value="wallpaper" data-i18n="type.wallpaper">Wallpaper</option></select></div>
+        </div>
+        <label for="url-policy" data-i18n="url.policy">Updates</label>
+        <select id="url-policy"><option value="notify" data-i18n="policy.notify">Notify me</option><option value="auto" data-i18n="policy.auto">Update automatically</option></select>
+      </div>
+      <p class="error" id="url-error" hidden></p>
+      <div class="row end">
+        <button type="button" class="btn" id="btn-url-cancel" data-i18n="common.cancel">Cancel</button>
+        <button type="button" class="btn primary" id="btn-url-install" disabled data-i18n="common.install">Install</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts"></div>
+  <script src="app.js"></script>
+</body>
+</html>

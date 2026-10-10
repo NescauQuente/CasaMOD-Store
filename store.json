@@ -1,0 +1,41 @@
+{
+  "name": "NescauQuente",
+  "items": [
+    {
+      "id": "live-wallpapers",
+      "name": "Live Wallpapers",
+      "type": "mod",
+      "repo": "NescauQuente/CasaMODs",
+      "path": "casaos-live-wallpapers/live-wallpapers",
+      "description": "Animated (Wallpaper Engine web) wallpapers for the CasaOS desktop. Wallpapers are read from mod/wallpapers/.",
+      "author": "NescauQuente"
+    },
+    {
+      "id": "music-player-widget",
+      "name": "Music Player",
+      "type": "mod",
+      "repo": "NescauQuente/CasaMODs",
+      "path": "casaos-music-player/music-player-widget",
+      "description": "A music player widget for the CasaOS desktop.",
+      "author": "NescauQuente"
+    },
+    {
+      "id": "star-wallpaper",
+      "name": "Starry Orbit",
+      "type": "wallpaper",
+      "repo": "NescauQuente/WE-Wallpapers",
+      "path": "star-wallpaper",
+      "description": "Starry Orbit, a Wallpaper Engine web wallpaper for Live Wallpapers.",
+      "author": "NescauQuente"
+    },
+    {
+      "id": "plexus-wallpaper",
+      "name": "Neural Plexus",
+      "type": "wallpaper",
+      "repo": "NescauQuente/WE-Wallpapers",
+      "path": "plexus-wallpaper",
+      "description": "Neural Plexus, a Wallpaper Engine web wallpaper for Live Wallpapers.",
+      "author": "NescauQuente"
+    }
+  ]
+}

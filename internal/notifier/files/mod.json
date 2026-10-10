@@ -1,0 +1,9 @@
+{
+  "name": "casamod-store-notifier",
+  "version": "1.0.0",
+  "description": "Shows a small notice on the CasaOS desktop when CasaMOD Store has updates for your mods and wallpapers. Installed and managed by the CasaMOD Store container.",
+  "author": "NescauQuente",
+  "casaos_min_version": "0.4.0",
+  "entry": "mod.js",
+  "styles": []
+}

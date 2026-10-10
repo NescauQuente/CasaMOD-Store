@@ -1,0 +1,627 @@
+/* CasaMOD Store web UI. Plain JavaScript, no build step. */
+(function () {
+  "use strict";
+
+  // ---------------------------------------------------------------- i18n
+  var STRINGS = {
+    en: {
+      "tab.store": "Store", "tab.installed": "Installed", "tab.updates": "Updates", "tab.settings": "Settings",
+      "store.search": "Search mods and wallpapers", "store.refresh": "Refresh", "store.addUrl": "Add from GitHub URL",
+      "store.empty": "Nothing found.", "store.clearSelection": "Clear", "store.installSelected": "Install selected",
+      "store.selected": "{n} selected", "store.sourceError": "Could not load {source}: {error}",
+      "filter.all": "All", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "All sources",
+      "type.mod": "Mod", "type.wallpaper": "Wallpaper",
+      "state.installed": "Installed", "state.update": "Update available", "state.manual": "Installed manually",
+      "state.missing": "Folder missing", "state.upToDate": "Up to date", "state.error": "Check failed",
+      "common.install": "Install", "common.update": "Update", "common.remove": "Remove", "common.cancel": "Cancel",
+      "common.reinstall": "Reinstall", "common.replace": "Replace",
+      "installed.title": "Installed by the store", "installed.empty": "Nothing installed by the store yet.",
+      "manual.title": "Installed manually", "manual.hint": "These folders were not installed by the store, so it never changes or removes them.",
+      "manual.empty": "None.",
+      "policy.notify": "Notify me", "policy.auto": "Update automatically",
+      "updates.check": "Check now", "updates.updateAll": "Update all", "updates.empty": "Everything is up to date.",
+      "updates.last": "Last check: {when}", "updates.never": "Not checked yet", "updates.next": "next: {when}",
+      "updates.off": "automatic checks are off",
+      "log.title": "Activity",
+      "settings.github": "GitHub", "settings.token": "Access token (optional)", "settings.clearToken": "Remove token",
+      "settings.tokenHint": "Needed for private repositories and to raise the API limit from 60 to 5000 requests per hour. A fine-grained token with read-only \"Contents\" access is enough. It is stored only in this container.",
+      "settings.tokenSet": "A token is saved.", "settings.tokenUnset": "No token saved.",
+      "settings.catalogs": "Catalogs (one per line)",
+      "settings.catalogsHint": "A store.json file in a GitHub repository: owner/repo, a GitHub URL, or a raw URL.",
+      "settings.casamodMods": "Show the mods that come with CasaMOD",
+      "settings.updates": "Updates", "settings.interval": "Check every (hours, 0 = never)",
+      "settings.notifier": "Show a notice on the CasaOS desktop when updates are waiting",
+      "settings.publicUrl": "Store address used by the notice (optional)",
+      "settings.port": "Store port (used when the address is empty)",
+      "settings.container": "CasaMOD container name",
+      "settings.containerHint": "Restarted after a mod is added or removed, so CasaMOD loads it.",
+      "settings.restartNow": "Restart CasaMOD now", "settings.save": "Save", "settings.saved": "Settings saved.",
+      "url.title": "Add from GitHub", "url.url": "Repository or folder URL", "url.read": "Read",
+      "url.repo": "Repository", "url.branch": "Branch (empty = default)", "url.path": "Folder in the repository (empty = root)",
+      "url.id": "Folder name (id)", "url.type": "Type", "url.policy": "Updates",
+      "banner.pending": "CasaMOD will restart in a moment to load the new mods. Reload CasaOS afterwards.",
+      "banner.needed": "CasaMOD must be restarted to load the changes: {error}",
+      "banner.noDocker": "The Docker socket is not mounted: after adding or removing mods, restart the CasaMOD app yourself.",
+      "banner.restart": "Restart now", "banner.restarted": "CasaMOD restarted. Reload the CasaOS page.",
+      "confirm.remove": "Remove {name}?", "done.installed": "Installed {name}.", "done.updated": "Updated {name}.",
+      "done.removed": "Removed {name}.", "done.checked": "Update check finished.", "done.nothing": "Nothing to update.",
+      "err.network": "The store did not answer.",
+      "item.source": "Source", "item.version": "Version {sha} from {date}", "item.latest": "latest {sha}"
+    },
+    pt: {
+      "tab.store": "Loja", "tab.installed": "Instalados", "tab.updates": "Atualizações", "tab.settings": "Configurações",
+      "store.search": "Buscar mods e wallpapers", "store.refresh": "Recarregar", "store.addUrl": "Adicionar por URL do GitHub",
+      "store.empty": "Nada encontrado.", "store.clearSelection": "Limpar", "store.installSelected": "Instalar selecionados",
+      "store.selected": "{n} selecionado(s)", "store.sourceError": "Não foi possível carregar {source}: {error}",
+      "filter.all": "Todos", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "Todas as origens",
+      "type.mod": "Mod", "type.wallpaper": "Wallpaper",
+      "state.installed": "Instalado", "state.update": "Atualização disponível", "state.manual": "Instalado manualmente",
+      "state.missing": "Pasta ausente", "state.upToDate": "Atualizado", "state.error": "Falha na verificação",
+      "common.install": "Instalar", "common.update": "Atualizar", "common.remove": "Remover", "common.cancel": "Cancelar",
+      "common.reinstall": "Reinstalar", "common.replace": "Substituir",
+      "installed.title": "Instalados pela loja", "installed.empty": "Nada instalado pela loja ainda.",
+      "manual.title": "Instalados manualmente", "manual.hint": "Estas pastas não foram instaladas pela loja, então ela nunca as altera nem remove.",
+      "manual.empty": "Nenhum.",
+      "policy.notify": "Só avisar", "policy.auto": "Atualizar sozinho",
+      "updates.check": "Verificar agora", "updates.updateAll": "Atualizar tudo", "updates.empty": "Tudo atualizado.",
+      "updates.last": "Última verificação: {when}", "updates.never": "Ainda não verificado", "updates.next": "próxima: {when}",
+      "updates.off": "verificação automática desligada",
+      "log.title": "Atividade",
+      "settings.github": "GitHub", "settings.token": "Token de acesso (opcional)", "settings.clearToken": "Remover token",
+      "settings.tokenHint": "Necessário para repositórios privados e para subir o limite da API de 60 para 5000 requisições por hora. Um token fine-grained com acesso somente leitura a \"Contents\" basta. Ele fica guardado apenas neste container.",
+      "settings.tokenSet": "Há um token salvo.", "settings.tokenUnset": "Nenhum token salvo.",
+      "settings.catalogs": "Catálogos (um por linha)",
+      "settings.catalogsHint": "Um arquivo store.json num repositório do GitHub: dono/repo, uma URL do GitHub ou uma URL raw.",
+      "settings.casamodMods": "Mostrar os mods que vêm com o CasaMOD",
+      "settings.updates": "Atualizações", "settings.interval": "Verificar a cada (horas, 0 = nunca)",
+      "settings.notifier": "Mostrar um aviso na área de trabalho do CasaOS quando houver atualizações",
+      "settings.publicUrl": "Endereço da loja usado pelo aviso (opcional)",
+      "settings.port": "Porta da loja (usada quando o endereço está vazio)",
+      "settings.container": "Nome do container do CasaMOD",
+      "settings.containerHint": "Reiniciado depois que um mod é adicionado ou removido, para o CasaMOD carregá-lo.",
+      "settings.restartNow": "Reiniciar o CasaMOD agora", "settings.save": "Salvar", "settings.saved": "Configurações salvas.",
+      "url.title": "Adicionar do GitHub", "url.url": "URL do repositório ou da pasta", "url.read": "Ler",
+      "url.repo": "Repositório", "url.branch": "Branch (vazio = padrão)", "url.path": "Pasta no repositório (vazio = raiz)",
+      "url.id": "Nome da pasta (id)", "url.type": "Tipo", "url.policy": "Atualizações",
+      "banner.pending": "O CasaMOD vai reiniciar em instantes para carregar os novos mods. Depois recarregue o CasaOS.",
+      "banner.needed": "É preciso reiniciar o CasaMOD para carregar as mudanças: {error}",
+      "banner.noDocker": "O socket do Docker não está montado: depois de adicionar ou remover mods, reinicie o app CasaMOD você mesmo.",
+      "banner.restart": "Reiniciar agora", "banner.restarted": "CasaMOD reiniciado. Recarregue a página do CasaOS.",
+      "confirm.remove": "Remover {name}?", "done.installed": "{name} instalado.", "done.updated": "{name} atualizado.",
+      "done.removed": "{name} removido.", "done.checked": "Verificação concluída.", "done.nothing": "Nada para atualizar.",
+      "err.network": "A loja não respondeu.",
+      "item.source": "Origem", "item.version": "Versão {sha} de {date}", "item.latest": "mais recente {sha}"
+    }
+  };
+  var LANG = (navigator.language || "en").toLowerCase().indexOf("pt") === 0 ? "pt" : "en";
+  try {
+    var forced = new URLSearchParams(location.search).get("lang");
+    if (forced && STRINGS[forced]) LANG = forced;
+  } catch (e) {}
+
+  function t(key, vars) {
+    var s = (STRINGS[LANG] && STRINGS[LANG][key]) || STRINGS.en[key] || key;
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split("{" + k + "}").join(vars[k]); });
+    return s;
+  }
+
+  function applyI18n() {
+    document.documentElement.lang = LANG === "pt" ? "pt-BR" : "en";
+    document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  }
+
+  // ---------------------------------------------------------------- helpers
+  function $(id) { return document.getElementById(id); }
+
+  function el(tag, attrs, children) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v === null || v === undefined || v === false) return;
+      if (k === "text") e.textContent = v;
+      else if (k === "class") e.className = v;
+      else if (k.indexOf("on") === 0) e.addEventListener(k.slice(2), v);
+      else if (k === "dataset") Object.keys(v).forEach(function (d) { e.dataset[d] = v[d]; });
+      else e.setAttribute(k, v === true ? "" : v);
+    });
+    (children || []).forEach(function (c) {
+      if (c === null || c === undefined || c === false) return;
+      e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return e;
+  }
+
+  function api(method, path, body) {
+    var opts = { method: method, headers: { "X-CasaMOD-Store": "1" } };
+    if (body !== undefined) {
+      opts.headers["Content-Type"] = "application/json";
+      opts.body = JSON.stringify(body);
+    }
+    return fetch("api/" + path, opts).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (data) {
+        if (!r.ok) throw new Error(data.error || ("HTTP " + r.status));
+        return data;
+      });
+    }, function () { throw new Error(t("err.network")); });
+  }
+
+  function toast(msg, isError) {
+    var box = el("div", { class: "toast" + (isError ? " error" : ""), role: isError ? "alert" : "status", text: msg });
+    $("toasts").appendChild(box);
+    setTimeout(function () { box.remove(); }, isError ? 9000 : 4000);
+  }
+
+  function fmtDate(s) {
+    if (!s) return "";
+    var d = new Date(s);
+    if (isNaN(d) || d.getFullYear() < 2000) return "";
+    return d.toLocaleString(LANG === "pt" ? "pt-BR" : undefined, { dateStyle: "short", timeStyle: "short" });
+  }
+
+  function short(sha) { return (sha || "").slice(0, 7); }
+
+  function key(type, id) { return type + ":" + id; }
+
+  function sourceURL(src) {
+    var u = "https://github.com/" + src.repo;
+    if (src.branch || src.path) u += "/tree/" + encodeURIComponent(src.branch || "HEAD") + (src.path ? "/" + src.path : "");
+    return u;
+  }
+
+  function sourceText(src) {
+    return src.repo + (src.branch ? "@" + src.branch : "") + (src.path ? " / " + src.path : "");
+  }
+
+  // ---------------------------------------------------------------- state
+  var state = null;      // /api/state
+  var catalog = null;    // /api/store
+  var filters = { q: "", type: "", source: "" };
+  var selected = {};     // store selection, by item index key
+  var inFlight = 0;
+  var pollTimer = null;
+
+  function installedMap() {
+    var m = {};
+    (state ? state.installed : []).forEach(function (it) { m[it.key] = it; });
+    return m;
+  }
+
+  function manualMap() {
+    var m = {};
+    (state ? state.manual : []).forEach(function (it) { m[key(it.type, it.id)] = it; });
+    return m;
+  }
+
+  function loadState() {
+    return api("GET", "state").then(function (s) {
+      state = s;
+      renderAll();
+      schedulePoll();
+    }).catch(function (e) {
+      schedulePoll();
+      throw e;
+    });
+  }
+
+  function schedulePoll() {
+    clearTimeout(pollTimer);
+    var fast = inFlight > 0 || (state && (state.busy || state.restart.pending));
+    pollTimer = setTimeout(function () { loadState().catch(function () {}); }, fast ? 1500 : 30000);
+  }
+
+  function loadStore(refresh) {
+    $("btn-refresh-store").disabled = true;
+    return api("GET", "store" + (refresh ? "?refresh=1" : "")).then(function (c) {
+      catalog = c;
+      renderSourceFilter();
+      renderStore();
+    }).catch(function (e) { toast(e.message, true); })
+      .then(function () { $("btn-refresh-store").disabled = false; });
+  }
+
+  // Runs an operation with the busy indicator and refreshes the state.
+  function run(promise) {
+    inFlight++;
+    renderBusy();
+    schedulePoll();
+    return promise.then(function (res) {
+      inFlight--;
+      return loadState().then(function () { return res; }, function () { return res; });
+    }, function (err) {
+      inFlight--;
+      loadState().catch(function () {});
+      throw err;
+    });
+  }
+
+  // ---------------------------------------------------------------- render
+  function renderAll() {
+    $("version").textContent = /^v?\d/.test(state.version || "") ? "v" + state.version.replace(/^v/, "") : (state.version || "");
+    var updates = state.installed.filter(function (i) { return i.has_update; }).length;
+    $("count-installed").textContent = state.installed.length || "";
+    $("count-updates").textContent = updates || "";
+    renderBusy();
+    renderBanners();
+    renderInstalled();
+    renderUpdates();
+    renderSettings();
+    if (catalog) renderStore();
+  }
+
+  function renderBusy() {
+    var text = (state && state.busy) || "";
+    $("busy").hidden = !(inFlight > 0 || text);
+    $("busy-text").textContent = text || "…";
+  }
+
+  function renderBanners() {
+    var box = $("banners");
+    box.textContent = "";
+    var r = state.restart || {};
+    if (r.pending) {
+      box.appendChild(el("div", { class: "banner info", id: "banner-pending" }, [el("span", { text: t("banner.pending") })]));
+    } else if (r.needed) {
+      box.appendChild(el("div", { class: "banner err", id: "banner-restart" }, [
+        el("span", { text: t("banner.needed", { error: r.last_error || "" }) }),
+        el("button", { class: "btn", text: t("banner.restart"), onclick: restartNow })
+      ]));
+    }
+    if (!state.docker_available) {
+      box.appendChild(el("div", { class: "banner warn", id: "banner-docker" }, [el("span", { text: t("banner.noDocker") })]));
+    }
+  }
+
+  function renderSourceFilter() {
+    var sel = $("source-filter");
+    var cur = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    (catalog.sources || []).forEach(function (s) {
+      sel.appendChild(el("option", { value: s.label, text: s.label + " (" + s.count + ")" }));
+    });
+    sel.value = cur;
+    var errs = $("source-errors");
+    errs.textContent = "";
+    (catalog.sources || []).forEach(function (s) {
+      if (s.error) errs.appendChild(el("div", { class: "banner err source-error" }, [
+        el("span", { text: t("store.sourceError", { source: s.label, error: s.error }) })
+      ]));
+    });
+  }
+
+  function itemKey(item) { return key(item.type, item.id) + "|" + item.source.repo + "|" + item.source.path; }
+
+  function filteredItems() {
+    var q = filters.q.toLowerCase();
+    return (catalog.items || []).filter(function (it) {
+      if (filters.type && it.type !== filters.type) return false;
+      if (filters.source && it.origin_label !== filters.source) return false;
+      if (q && (it.name + " " + it.id + " " + (it.description || "") + " " + (it.author || "")).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+
+  function renderStore() {
+    var grid = $("store-grid");
+    grid.textContent = "";
+    var inst = installedMap();
+    var manual = manualMap();
+    var items = filteredItems();
+    $("store-empty").hidden = items.length > 0;
+    items.forEach(function (item) {
+      var k = key(item.type, item.id);
+      var mine = inst[k];
+      var sameSource = mine && mine.source.repo === item.source.repo && mine.source.path === item.source.path;
+      var ik = itemKey(item);
+      var badges = [
+        el("span", { class: "badge", text: t("type." + item.type) }),
+        el("span", { class: "badge", text: item.origin_label })
+      ];
+      if (item.version) badges.push(el("span", { class: "badge", text: "v" + item.version }));
+      var action;
+      if (sameSource && mine.has_update) {
+        badges.push(el("span", { class: "badge accent", text: t("state.update") }));
+        action = el("button", { class: "btn primary small", text: t("common.update"), onclick: function () { doUpdate([mine.key], mine.name); } });
+      } else if (sameSource) {
+        badges.push(el("span", { class: "badge ok", text: "✓ " + t("state.installed") }));
+        action = null;
+      } else {
+        if (manual[k]) badges.push(el("span", { class: "badge warn", text: t("state.manual") }));
+        action = el("button", { class: "btn primary small", text: t("common.install"), onclick: function () { doInstall([toRequest(item)]); } });
+      }
+      var preview = el("div", { class: "preview" }, [item.preview
+        ? el("img", { src: item.preview, alt: "", loading: "lazy", onerror: function () { this.remove(); } })
+        : null, item.preview ? null : (item.type === "wallpaper" ? "🖼" : "🧩")]);
+      var checkbox = sameSource ? null : el("input", {
+        type: "checkbox", class: "select", "aria-label": item.name, checked: !!selected[ik],
+        onchange: function (e) {
+          if (e.target.checked) selected[ik] = item; else delete selected[ik];
+          card.classList.toggle("selected", e.target.checked);
+          renderSelection();
+        }
+      });
+      var card = el("article", { class: "card" + (selected[ik] ? " selected" : ""), dataset: { key: k, origin: item.origin } }, [
+        checkbox,
+        preview,
+        el("div", { class: "body" }, [
+          el("div", { class: "title" }, [el("strong", { text: item.name })]),
+          el("div", { class: "meta" }, badges),
+          el("div", { class: "desc", text: item.description || "" })
+        ]),
+        el("div", { class: "actions" }, [
+          action,
+          el("a", { href: sourceURL(item.source), target: "_blank", rel: "noopener", class: "hint", text: "GitHub ↗" })
+        ])
+      ]);
+      grid.appendChild(card);
+    });
+    renderSelection();
+  }
+
+  function renderSelection() {
+    var n = Object.keys(selected).length;
+    $("selection-bar").hidden = n === 0;
+    $("selection-text").textContent = t("store.selected", { n: n });
+  }
+
+  function toRequest(item) {
+    return {
+      id: item.id, type: item.type, name: item.name, description: item.description || "",
+      source: item.source, origin: item.origin
+    };
+  }
+
+  function statusBadge(it) {
+    if (it.missing) return el("span", { class: "badge err", text: t("state.missing") });
+    if (it.has_update) return el("span", { class: "badge accent", text: t("state.update") });
+    if (it.last_error) return el("span", { class: "badge warn", text: t("state.error") });
+    return el("span", { class: "badge ok", text: t("state.upToDate") });
+  }
+
+  function policySelect(it) {
+    var sel = el("select", { "aria-label": t("url.policy"), class: "policy" }, [
+      el("option", { value: "notify", text: t("policy.notify") }),
+      el("option", { value: "auto", text: t("policy.auto") })
+    ]);
+    sel.value = it.policy;
+    sel.addEventListener("change", function () {
+      api("POST", "policy", { key: it.key, policy: sel.value })
+        .then(function () { return loadState(); })
+        .catch(function (e) { toast(e.message, true); });
+    });
+    return sel;
+  }
+
+  function installedRow(it, forUpdates) {
+    var sub = [
+      el("a", { href: sourceURL(it.source), target: "_blank", rel: "noopener", text: sourceText(it.source) }),
+      " · ",
+      t("item.version", { sha: short(it.sha), date: fmtDate(it.updated_at) })
+    ];
+    if (it.has_update) {
+      sub.push(" → " + t("item.latest", { sha: short(it.latest_sha) }));
+      if (it.latest_message) sub.push(" (" + it.latest_message + ")");
+    }
+    var controls = [policySelect(it)];
+    if (it.has_update || it.missing) {
+      controls.push(el("button", { class: "btn primary small", text: it.missing ? t("common.reinstall") : t("common.update"),
+        onclick: function () { doUpdate([it.key], it.name); } }));
+    }
+    if (!forUpdates) {
+      controls.push(el("button", { class: "btn danger small", text: t("common.remove"), onclick: function () { doRemove(it); } }));
+    }
+    return el("div", { class: "row-item", dataset: { key: it.key } }, [
+      el("div", { class: "info" }, [
+        el("div", { class: "name" }, [it.name, el("span", { class: "badge", text: t("type." + it.type) }), statusBadge(it)]),
+        el("div", { class: "sub" }, sub),
+        it.last_error ? el("div", { class: "error-line", text: it.last_error }) : null
+      ]),
+      el("div", { class: "controls" }, controls)
+    ]);
+  }
+
+  function renderInstalled() {
+    var list = $("installed-list");
+    list.textContent = "";
+    state.installed.forEach(function (it) { list.appendChild(installedRow(it, false)); });
+    $("installed-empty").hidden = state.installed.length > 0;
+    var ml = $("manual-list");
+    ml.textContent = "";
+    state.manual.forEach(function (m) {
+      ml.appendChild(el("div", { class: "row-item", dataset: { key: key(m.type, m.id) } }, [
+        el("div", { class: "info" }, [el("div", { class: "name" }, [m.id, el("span", { class: "badge", text: t("type." + m.type) })])]),
+        el("div")
+      ]));
+    });
+    $("manual-empty").hidden = state.manual.length > 0;
+  }
+
+  function renderUpdates() {
+    var list = $("updates-list");
+    list.textContent = "";
+    var ups = state.installed.filter(function (i) { return i.has_update || i.missing; });
+    ups.forEach(function (it) { list.appendChild(installedRow(it, true)); });
+    $("updates-empty").hidden = ups.length > 0;
+    $("btn-update-all").disabled = !state.installed.some(function (i) { return i.has_update; });
+    var info = state.last_check ? t("updates.last", { when: fmtDate(state.last_check) }) : t("updates.never");
+    if (state.config.check_interval_hours > 0) {
+      if (state.next_check) info += " · " + t("updates.next", { when: fmtDate(state.next_check) });
+    } else {
+      info += " · " + t("updates.off");
+    }
+    $("check-info").textContent = info;
+    var log = $("log");
+    log.textContent = "";
+    state.log.slice().reverse().forEach(function (l) {
+      log.appendChild(el("li", { class: l.level }, [el("time", { text: fmtDate(l.time) }), l.message]));
+    });
+  }
+
+  var settingsDirty = false;
+  function renderSettings() {
+    if (settingsDirty) return;
+    var c = state.config;
+    $("token-state").textContent = c.has_token ? t("settings.tokenSet") : t("settings.tokenUnset");
+    $("btn-clear-token").disabled = !c.has_token;
+    $("set-catalogs").value = (c.catalogs || []).join("\n");
+    $("set-casamod-mods").checked = c.include_casamod_mods;
+    $("set-interval").value = c.check_interval_hours;
+    $("set-notifier").checked = c.notifier;
+    $("set-public-url").value = c.public_url || "";
+    $("set-port").value = c.ui_port;
+    $("set-container").value = c.casamod_container;
+  }
+
+  // ---------------------------------------------------------------- actions
+  function reportResults(res, doneKey, names) {
+    var conflicts = [];
+    (res.results || []).forEach(function (r, i) {
+      if (r.ok) toast(t(doneKey, { name: names[i] || r.key }));
+      else if (r.conflict) conflicts.push(i);
+      else toast((names[i] || r.key) + ": " + r.error, true);
+    });
+    return conflicts;
+  }
+
+  function doInstall(reqs) {
+    var names = reqs.map(function (r) { return r.name || r.id; });
+    return run(api("POST", "install", { items: reqs })).then(function (res) {
+      var conflicts = reportResults(res, "done.installed", names);
+      var forced = conflicts.filter(function (i) {
+        return window.confirm(res.results[i].error);
+      }).map(function (i) { var r = Object.assign({}, reqs[i]); r.force = true; return r; });
+      if (forced.length) return doInstall(forced);
+      return res;
+    }).catch(function (e) { toast(e.message, true); });
+  }
+
+  function doUpdate(keys, name) {
+    return run(api("POST", "update", { keys: keys })).then(function (res) {
+      if (!res.results || !res.results.length) toast(t("done.nothing"));
+      reportResults(res, "done.updated", keys.length === 1 ? [name] : []);
+    }).catch(function (e) { toast(e.message, true); });
+  }
+
+  function doRemove(it) {
+    if (!window.confirm(t("confirm.remove", { name: it.name }))) return;
+    return run(api("POST", "remove", { keys: [it.key] })).then(function (res) {
+      reportResults(res, "done.removed", [it.name]);
+    }).catch(function (e) { toast(e.message, true); });
+  }
+
+  function restartNow() {
+    return run(api("POST", "restart")).then(function () { toast(t("banner.restarted")); })
+      .catch(function (e) { toast(e.message, true); });
+  }
+
+  // ---------------------------------------------------------------- tabs
+  var TABS = ["store", "installed", "updates", "settings"];
+  function showTab() {
+    var name = (location.hash || "#store").slice(1);
+    if (TABS.indexOf(name) < 0) name = "store";
+    TABS.forEach(function (n) { $("tab-" + n).hidden = n !== name; });
+    document.querySelectorAll("#tabs a").forEach(function (a) { a.classList.toggle("active", a.dataset.tab === name); });
+    if (name === "store" && !catalog) loadStore(false);
+  }
+
+  // ---------------------------------------------------------------- URL dialog
+  function openURLDialog() {
+    $("url-form").reset();
+    $("url-details").hidden = true;
+    $("url-error").hidden = true;
+    $("btn-url-install").disabled = true;
+    $("dlg-url").showModal();
+    $("url-input").focus();
+  }
+
+  function resolveURL() {
+    $("url-error").hidden = true;
+    api("POST", "resolve", { url: $("url-input").value }).then(function (r) {
+      $("url-repo").value = r.source.repo;
+      $("url-branch").value = r.source.branch || "";
+      $("url-path").value = r.source.path || "";
+      $("url-id").value = r.id;
+      $("url-type").value = r.type;
+      $("url-details").hidden = false;
+      $("btn-url-install").disabled = false;
+    }).catch(function (e) {
+      $("url-error").textContent = e.message;
+      $("url-error").hidden = false;
+    });
+  }
+
+  function installFromURL() {
+    var req = {
+      id: $("url-id").value.trim(), type: $("url-type").value, name: $("url-id").value.trim(),
+      source: { repo: $("url-repo").value.trim(), branch: $("url-branch").value.trim(), path: $("url-path").value.trim() },
+      origin: "url", policy: $("url-policy").value
+    };
+    $("dlg-url").close();
+    doInstall([req]);
+  }
+
+  // ---------------------------------------------------------------- wiring
+  function wire() {
+    window.addEventListener("hashchange", showTab);
+    $("search").addEventListener("input", function (e) { filters.q = e.target.value; renderStore(); });
+    $("type-filter").addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      filters.type = b.dataset.type;
+      document.querySelectorAll("#type-filter .chip").forEach(function (c) { c.classList.toggle("active", c === b); });
+      renderStore();
+    });
+    $("source-filter").addEventListener("change", function (e) { filters.source = e.target.value; renderStore(); });
+    $("btn-refresh-store").addEventListener("click", function () { loadStore(true); });
+    $("btn-add-url").addEventListener("click", openURLDialog);
+    $("btn-resolve").addEventListener("click", resolveURL);
+    $("url-input").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); resolveURL(); } });
+    $("btn-url-cancel").addEventListener("click", function () { $("dlg-url").close(); });
+    $("btn-url-install").addEventListener("click", installFromURL);
+    $("btn-clear-selection").addEventListener("click", function () { selected = {}; renderStore(); });
+    $("btn-install-selected").addEventListener("click", function () {
+      var reqs = Object.keys(selected).map(function (k) { return toRequest(selected[k]); });
+      selected = {};
+      renderSelection();
+      doInstall(reqs);
+    });
+    $("btn-check").addEventListener("click", function () {
+      run(api("POST", "check")).then(function () { toast(t("done.checked")); }).catch(function (e) { toast(e.message, true); });
+    });
+    $("btn-update-all").addEventListener("click", function () { doUpdate([], ""); });
+    $("btn-restart").addEventListener("click", restartNow);
+    $("settings-form").addEventListener("input", function () { settingsDirty = true; });
+    $("btn-clear-token").addEventListener("click", function () {
+      api("POST", "settings", { clear_token: true }).then(function () {
+        toast(t("settings.saved"));
+        settingsDirty = false;
+        return loadState();
+      }).catch(function (e) { toast(e.message, true); });
+    });
+    $("settings-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var body = {
+        catalogs: $("set-catalogs").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean),
+        include_casamod_mods: $("set-casamod-mods").checked,
+        check_interval_hours: parseFloat($("set-interval").value) || 0,
+        notifier: $("set-notifier").checked,
+        public_url: $("set-public-url").value.trim(),
+        ui_port: parseInt($("set-port").value, 10) || 8418,
+        casamod_container: $("set-container").value.trim()
+      };
+      var token = $("set-token").value.trim();
+      if (token) body.github_token = token;
+      api("POST", "settings", body).then(function () {
+        toast(t("settings.saved"));
+        $("set-token").value = "";
+        settingsDirty = false;
+        catalog = null;
+        return loadState();
+      }).catch(function (e) { toast(e.message, true); });
+    });
+  }
+
+  applyI18n();
+  wire();
+  loadState().then(showTab, function (e) { toast(e.message, true); showTab(); });
+})();
