@@ -224,6 +224,10 @@ Regras:
    `mock(s)`, `docs`, `doc`, `example(s)` e `node_modules` são ignoradas.
 6. Nome, descrição, versão e prévia vêm do `mod.json` (mods) ou do
    `project.json` (wallpapers) quando existem; senão, vale o nome da pasta.
+7. **Foto do card**: coloque um `preview.png` (ou `.jpg`, `.jpeg`, `.webp`,
+   `.gif`) na raiz da pasta do item. Um `preview` indicado no
+   `mod.json`/`project.json` tem prioridade. As fotos são carregadas pelo
+   navegador direto do GitHub, então só aparecem em repositórios públicos.
 
 Exemplo de estrutura:
 
@@ -231,7 +235,8 @@ Exemplo de estrutura:
 meus-mods/                    (fonte: dono/meus-mods)
 ├── README.md
 ├── hide-footer/              → mod "hide-footer"
-│   └── mod.css
+│   ├── mod.css
+│   └── preview.png           (opcional: foto do card)
 ├── music-player-widget/      → mod "music-player-widget"
 │   ├── mod.js
 │   ├── mod.css

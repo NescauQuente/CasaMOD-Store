@@ -135,8 +135,30 @@ func Discover(ctx context.Context, gh *github.Client, src github.Source) (label 
 			warnings = append(warnings, Warning{Kind: WarnSameID, Path: it.ID, Type: it.Type, Inner: paths})
 		}
 	}
+	for i := range items {
+		if name := previewFile(files[items[i].Source.Path]); name != "" {
+			items[i].Preview = rawURL(items[i].Source.Repo, ref, path.Join(items[i].Source.Path, name))
+		}
+	}
 	describe(ctx, gh, ref, items, files)
 	return label, items, warnings, nil
+}
+
+// PreviewFiles are the image names used as a card's picture when they sit
+// at the root of an item folder (a preview in mod.json/project.json wins).
+var PreviewFiles = []string{"preview.png", "preview.jpg", "preview.jpeg", "preview.webp", "preview.gif"}
+
+func previewFile(names map[string]bool) string {
+	for _, n := range PreviewFiles {
+		if names[n] {
+			return n
+		}
+	}
+	return ""
+}
+
+func rawURL(repo, ref, p string) string {
+	return "https://raw.githubusercontent.com/" + repo + "/" + ref + "/" + p
 }
 
 func skipped(dir string) bool {
@@ -209,7 +231,7 @@ func describe(ctx context.Context, gh *github.Client, ref string, items []Item, 
 				if strings.Contains(p, "://") {
 					it.Preview = p
 				} else {
-					it.Preview = "https://raw.githubusercontent.com/" + it.Source.Repo + "/" + ref + "/" + path.Join(it.Source.Path, p)
+					it.Preview = rawURL(it.Source.Repo, ref, path.Join(it.Source.Path, p))
 				}
 			}
 		}()

@@ -25,6 +25,7 @@ func TestDiscover(t *testing.T) {
 		"proj-a/live/assets/demo/index.html": "inside a mod: not an item",
 		"proj-a/tests/mod.js":                "test copy",
 		"proj-b/widget/mod.css":              "x",
+		"proj-b/widget/preview.webp":         "img",
 		".github/x/mod.js":                   "ignored",
 	})
 	gh.Push("me/walls", "main", "init", map[string]string{
@@ -45,6 +46,10 @@ func TestDiscover(t *testing.T) {
 	if len(items) != 2 || got["mod:live"].Name != "Live Wallpapers" || got["mod:live"].Version != "1.2.0" ||
 		got["mod:live"].Source.Path != "proj-a/live" || got["mod:widget"].OriginLabel != "mods" {
 		t.Fatalf("mods: %+v", items)
+	}
+	// preview.* at the root of the folder is the card's picture.
+	if got["mod:widget"].Preview != "https://raw.githubusercontent.com/me/mods/HEAD/proj-b/widget/preview.webp" || got["mod:live"].Preview != "" {
+		t.Fatalf("previews: %q %q", got["mod:widget"].Preview, got["mod:live"].Preview)
 	}
 	// The page inside the mod is ignored, and said so.
 	if len(warns) != 1 || warns[0].Kind != WarnIgnored || warns[0].Path != "proj-a/live" ||

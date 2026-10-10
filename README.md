@@ -216,6 +216,11 @@ Rules:
 6. Name, description, version and preview come from `mod.json` (mods) or
    `project.json` (wallpapers) when present; otherwise the folder name is
    used.
+7. **Card picture**: put `preview.png` (or `.jpg`, `.jpeg`, `.webp`,
+   `.gif`) at the root of the item folder. A `preview` named in
+   `mod.json`/`project.json` takes precedence. Pictures are loaded by the
+   browser straight from GitHub, so they only show for public
+   repositories.
 
 Example layout:
 
@@ -223,7 +228,8 @@ Example layout:
 my-mods/                      (source: owner/my-mods)
 ├── README.md
 ├── hide-footer/              → mod "hide-footer"
-│   └── mod.css
+│   ├── mod.css
+│   └── preview.png           (optional: picture of the card)
 ├── music-player-widget/      → mod "music-player-widget"
 │   ├── mod.js
 │   ├── mod.css
