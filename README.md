@@ -1,5 +1,7 @@
 # CasaMOD Store
 
+**English** | [Português (Brasil)](README.pt-BR.md)
+
 A store for [CasaMOD](https://github.com/Cp0204/CasaMOD): install, update and
 remove CasaMOD **mods** and **wallpapers** straight from GitHub, from a web UI
 that opens from the app icon in CasaOS.
@@ -53,6 +55,10 @@ When a new image is published the store lists **CasaMOD Store** in the
 **Updates** tab and in the desktop notice. Update it in CasaOS: app icon menu
 (⋮) → **Check then update**. Settings and installed items are kept: they live
 in `/DATA/AppData/casamod-store`.
+
+CasaOS caches the answer of that check for up to an hour. If it says the app
+is up to date right after a release, wait, or run
+`sudo systemctl restart casaos-app-management` on the server and check again.
 
 ### Uninstalling
 

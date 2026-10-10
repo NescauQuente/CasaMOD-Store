@@ -8,6 +8,8 @@ wallpapers from GitHub, with a web UI and a notifier mini-mod. See README.md.
 - The user's CasaOS (`http://the-maquina`, CasaOS 0.4.15) is only reachable on
   their LAN/Tailscale: test against the mocks, never against the real server.
 - Commits as UsuarioDeJava, straight to `main`; no PR unless asked.
+- README.md (English) and README.pt-BR.md (Portuguese) are kept in sync:
+  any change to one goes to the other.
 - UI text: only the titles/labels that are needed. No hints, explanations or
   "(this app)"-style asides in the web UI or notifier (docs go in README).
 - On the user's (weak) PC run the browser suite once per change; in the cloud
