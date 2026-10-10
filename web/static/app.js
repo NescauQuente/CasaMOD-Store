@@ -312,7 +312,7 @@
         ]),
         el("div", { class: "actions" }, [
           action,
-          el("a", { href: sourceURL(item.source), target: "_blank", rel: "noopener", class: "hint", text: "GitHub ↗" })
+          el("a", { href: sourceURL(item.source), target: "_blank", rel: "noopener", class: "hint", text: item.source.repo.split("/")[0] + " ↗" })
         ])
       ]);
       grid.appendChild(card);

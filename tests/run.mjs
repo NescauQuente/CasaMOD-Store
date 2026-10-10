@@ -197,6 +197,9 @@ try {
     // Without a preview the owner's GitHub picture is tried, then the icon
     // (github.com is not reachable from the tests, so the icon remains).
     await page.waitFor(`[...document.querySelectorAll("#store-grid .preview")].every(p => p.querySelector("img") || /🧩|🖼/.test(p.textContent))`);
+    assert.equal(await page.text('.card[data-key="mod:show-dotfiles"] .actions a'), "Cp0204 ↗");
+    assert.equal(await page.eval(`document.querySelector('.card[data-key="mod:show-dotfiles"] .actions a').href`),
+      "https://github.com/Cp0204/CasaMOD/tree/main/app/mod/show-dotfiles");
     await shot("01-store");
   });
 
