@@ -14,8 +14,9 @@ that opens from the app icon in CasaOS.
 - **Updates of the store itself**: the image records the commit it was built
   from; each check compares it with the last successful
   `docker-publish.yml` run on `main` and, when a newer image exists, shows it
-  in the UI and in the desktop notice. Update the app in CasaOS (app menu →
-  *Check then update*).
+  in the UI and in the desktop notice. CasaOS' *Check then update* only
+  works for apps from an app store, so for a custom install update with:
+  `docker compose -f /var/lib/casaos/apps/casamod-store/docker-compose.yml up -d --pull always`
 - Small: one static Go binary (no dependencies), multi-arch image
   (amd64, arm/v7, arm64).
 
