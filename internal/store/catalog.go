@@ -92,10 +92,10 @@ func ParseCatalogRef(raw string) (CatalogRef, error) {
 }
 
 // LoadCatalog downloads and parses a catalog.
-func LoadCatalog(ctx context.Context, gh *github.Client, raw string) (label string, items []Item, err error) {
+func LoadCatalog(ctx context.Context, gh *github.Client, raw string) (label string, items []Item, warnings []Warning, err error) {
 	ref, err := ParseCatalogRef(raw)
 	if err != nil {
-		return raw, nil, err
+		return raw, nil, nil, err
 	}
 	var data []byte
 	if ref.URL != "" {
@@ -116,13 +116,13 @@ func LoadCatalog(ctx context.Context, gh *github.Client, raw string) (label stri
 		return Discover(ctx, gh, dir)
 	}
 	if err != nil {
-		return label, nil, err
+		return label, nil, nil, err
 	}
 	var cf catalogFile
 	if err := json.Unmarshal(data, &cf); err != nil {
 		var arr []catalogItem
 		if json.Unmarshal(data, &arr) != nil {
-			return label, nil, fmt.Errorf("invalid catalog JSON: %w", err)
+			return label, nil, nil, fmt.Errorf("invalid catalog JSON: %w", err)
 		}
 		cf.Items = arr
 	}
@@ -137,7 +137,7 @@ func LoadCatalog(ctx context.Context, gh *github.Client, raw string) (label stri
 		it.OriginLabel = label
 		items = append(items, it)
 	}
-	return label, items, nil
+	return label, items, nil, nil
 }
 
 func (ci catalogItem) toItem(ref CatalogRef) (Item, error) {

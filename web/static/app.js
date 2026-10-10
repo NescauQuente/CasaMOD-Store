@@ -9,6 +9,10 @@
       "store.search": "Search mods and wallpapers", "store.refresh": "Refresh", "store.addUrl": "Add from GitHub URL",
       "store.empty": "Nothing found.", "store.clearSelection": "Clear", "store.installSelected": "Install selected",
       "store.selected": "{n} selected", "store.sourceError": "Could not load {source}: {error}",
+      "warn.mixed": "{source}: {path} has both mod and wallpaper files (read as {type})",
+      "warn.ignored": "{source}: {path} is a {type}, so {inner} inside it is ignored",
+      "warn.empty": "{source}: no mods or wallpapers found",
+      "warn.same_id": "{source}: {inner} have the same name \"{path}\" and would install into the same folder",
       "filter.all": "All", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "All sources",
       "type.mod": "Mod", "type.wallpaper": "Wallpaper",
       "state.installed": "Installed", "state.update": "Update available", "state.manual": "Manual",
@@ -49,6 +53,10 @@
       "store.search": "Buscar mods e wallpapers", "store.refresh": "Recarregar", "store.addUrl": "Adicionar por URL do GitHub",
       "store.empty": "Nada encontrado.", "store.clearSelection": "Limpar", "store.installSelected": "Instalar selecionados",
       "store.selected": "{n} selecionado(s)", "store.sourceError": "Não foi possível carregar {source}: {error}",
+      "warn.mixed": "{source}: {path} tem arquivos de mod e de wallpaper (lido como {type})",
+      "warn.ignored": "{source}: {path} é um {type}, então {inner} dentro dele é ignorado",
+      "warn.empty": "{source}: nenhum mod ou wallpaper encontrado",
+      "warn.same_id": "{source}: {inner} têm o mesmo nome \"{path}\" e seriam instalados na mesma pasta",
       "filter.all": "Todos", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "Todas as origens",
       "type.mod": "Mod", "type.wallpaper": "Wallpaper",
       "state.installed": "Instalado", "state.update": "Atualização disponível", "state.manual": "Manual",
@@ -281,6 +289,14 @@
       if (s.error) errs.appendChild(el("div", { class: "banner err source-error" }, [
         el("span", { text: t("store.sourceError", { source: s.label, error: s.error }) })
       ]));
+      (s.warnings || []).forEach(function (w) {
+        var inner = (w.inner || []).slice(0, 3).join(", ") + ((w.inner || []).length > 3 ? ", …" : "");
+        errs.appendChild(el("div", { class: "banner warn source-warning", dataset: { kind: w.kind } }, [
+          el("span", { text: t("warn." + w.kind, {
+            source: s.label, path: w.path || "/", type: w.type ? t("type." + w.type).toLowerCase() : "", inner: inner
+          }) })
+        ]));
+      });
     });
   }
 

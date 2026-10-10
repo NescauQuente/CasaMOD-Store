@@ -205,3 +205,5 @@ dialog .row.end { margin-top: 12px; }
   .row-item .controls { justify-content: flex-start; }
   .two { grid-template-columns: 1fr; }
 }
+#source-errors .banner { margin: 0 0 8px; }
+#source-errors:not(:empty) { margin-bottom: 14px; }

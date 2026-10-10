@@ -49,6 +49,16 @@ func main() {
 		"app/run.sh":                     "z",
 	})
 
+	// Sources that break the folder rules, for the warnings.
+	gh.Push("me/odd", "main", "odd", map[string]string{
+		"star/mod.js":                        "stray",
+		"star/wallpaper-engine/index.html":   "<html>",
+		"star/wallpaper-engine/project.json": `{"title":"Starry Orbit"}`,
+		"plexus/wallpaper-engine/index.html": "<html>",
+		"nebula/wallpaper-engine/index.html": "<html>",
+	})
+	gh.Push("me/empty", "main", "empty", map[string]string{"README.md": "nothing here"})
+
 	// The store itself: its "running" image is built from selfCommit (the
 	// browser tests start the store with CASAMOD_STORE_COMMIT set to it).
 	gh.Push("NescauQuente/CasaMOD-Store", "main", "store", map[string]string{"go.mod": "module x"})

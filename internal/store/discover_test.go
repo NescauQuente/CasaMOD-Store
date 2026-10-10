@@ -34,7 +34,7 @@ func TestDiscover(t *testing.T) {
 		"plexus-wallpaper/js/index.html": "nested page",
 	})
 
-	_, items, err := LoadCatalog(context.Background(), c, "me/mods")
+	_, items, warns, err := LoadCatalog(context.Background(), c, "me/mods")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,8 +46,13 @@ func TestDiscover(t *testing.T) {
 		got["mod:live"].Source.Path != "proj-a/live" || got["mod:widget"].OriginLabel != "mods" {
 		t.Fatalf("mods: %+v", items)
 	}
+	// The page inside the mod is ignored, and said so.
+	if len(warns) != 1 || warns[0].Kind != WarnIgnored || warns[0].Path != "proj-a/live" ||
+		warns[0].Type != "mod" || len(warns[0].Inner) != 1 || warns[0].Inner[0] != "proj-a/live/assets/demo" {
+		t.Fatalf("warnings: %+v", warns)
+	}
 
-	label, items, err := LoadCatalog(context.Background(), c, "https://github.com/me/walls")
+	label, items, _, err := LoadCatalog(context.Background(), c, "https://github.com/me/walls")
 	if err != nil || label != "walls" {
 		t.Fatal(label, err)
 	}
@@ -63,12 +68,53 @@ func TestDiscover(t *testing.T) {
 
 	// A store.json, when present, still wins over discovery.
 	gh.Push("me/walls", "main", "catalog", map[string]string{"store.json": `{"items":[{"id":"only","type":"wallpaper","path":"star-wallpaper"}]}`})
-	if _, items, _ := LoadCatalog(context.Background(), c, "me/walls"); len(items) != 1 || items[0].ID != "only" {
+	if _, items, _, _ := LoadCatalog(context.Background(), c, "me/walls"); len(items) != 1 || items[0].ID != "only" {
 		t.Fatalf("store.json ignored: %+v", items)
 	}
 	// An explicit .json file that is missing is an error, not a scan.
-	if _, _, err := LoadCatalog(context.Background(), c, "https://github.com/me/mods/blob/main/nope.json"); err == nil {
+	if _, _, _, err := LoadCatalog(context.Background(), c, "https://github.com/me/mods/blob/main/nope.json"); err == nil {
 		t.Fatal("missing explicit catalog file accepted")
+	}
+}
+
+// A folder with a stray mod.js around a wallpaper is read as a mod, and the
+// store warns about both the mixed files and the ignored wallpaper.
+func TestDiscoverWarnings(t *testing.T) {
+	gh := fakegithub.New()
+	srv := gh.Start()
+	defer srv.Close()
+	c := github.New(nil)
+	c.APIBase, c.RawBase, c.CodeloadBase = srv.URL+"/api", srv.URL+"/raw", srv.URL+"/codeload"
+	gh.Push("me/walls", "main", "init", map[string]string{
+		"star/mod.js":                        "stray",
+		"star/index.html":                    "<html>",
+		"star/wallpaper-engine/index.html":   "<html>",
+		"star/wallpaper-engine/project.json": `{"title":"Starry Orbit"}`,
+	})
+	_, items, warns, err := LoadCatalog(context.Background(), c, "me/walls")
+	if err != nil || len(items) != 1 || items[0].Type != "mod" || items[0].ID != "star" {
+		t.Fatalf("items: %+v %v", items, err)
+	}
+	if len(warns) != 2 || warns[0].Kind != WarnMixed || warns[1].Kind != WarnIgnored ||
+		warns[1].Inner[0] != "star/wallpaper-engine" {
+		t.Fatalf("warnings: %+v", warns)
+	}
+}
+
+func TestDiscoverSameID(t *testing.T) {
+	gh := fakegithub.New()
+	srv := gh.Start()
+	defer srv.Close()
+	c := github.New(nil)
+	c.APIBase, c.RawBase, c.CodeloadBase = srv.URL+"/api", srv.URL+"/raw", srv.URL+"/codeload"
+	gh.Push("me/walls", "main", "init", map[string]string{
+		"star/wallpaper-engine/index.html":   "<html>",
+		"plexus/wallpaper-engine/index.html": "<html>",
+	})
+	_, items, warns, _ := LoadCatalog(context.Background(), c, "me/walls")
+	if len(items) != 2 || len(warns) != 1 || warns[0].Kind != WarnSameID || warns[0].Path != "wallpaper-engine" ||
+		len(warns[0].Inner) != 2 {
+		t.Fatalf("items %+v warnings %+v", items, warns)
 	}
 }
 

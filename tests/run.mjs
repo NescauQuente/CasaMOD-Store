@@ -401,6 +401,23 @@ try {
     await shot("07-restart-banner");
   });
 
+  await test("sources that break the folder rules are flagged", async () => {
+    const r = await fetch(STORE + "/api/settings", {
+      method: "POST", headers: { "X-CasaMOD-Store": "1", "Content-Type": "application/json" },
+      body: JSON.stringify({ catalogs: ["me/catalog", "me/odd", "me/empty"] }),
+    });
+    assert.ok(r.ok);
+    await page.goto(STORE + "/?lang=pt#store");
+    await page.waitFor(`document.querySelectorAll(".source-warning").length === 3`, { message: "3 warnings" });
+    const texts = await page.eval(`[...document.querySelectorAll(".source-warning")].map(w => w.dataset.kind + "|" + w.textContent)`);
+    assert.deepEqual(texts, [
+      "ignored|odd: star é um mod, então star/wallpaper-engine dentro dele é ignorado",
+      'same_id|odd: nebula/wallpaper-engine, plexus/wallpaper-engine têm o mesmo nome "wallpaper-engine" e seriam instalados na mesma pasta',
+      "empty|empty: nenhum mod ou wallpaper encontrado",
+    ]);
+    await shot("07b-source-warnings");
+  });
+
   await test("phone width: no horizontal scroll", async () => {
     await page.viewport(390, 844, true);
     for (const tab of ["store", "installed", "updates", "settings"]) {

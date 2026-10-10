@@ -66,10 +66,11 @@ type catalogCache struct {
 
 // SourceStatus reports how a store source loaded.
 type SourceStatus struct {
-	Source string `json:"source"`
-	Label  string `json:"label"`
-	Count  int    `json:"count"`
-	Error  string `json:"error,omitempty"`
+	Source   string          `json:"source"`
+	Label    string          `json:"label"`
+	Count    int             `json:"count"`
+	Error    string          `json:"error,omitempty"`
+	Warnings []store.Warning `json:"warnings,omitempty"`
 }
 
 // Options configure New.
@@ -530,10 +531,12 @@ func (a *App) Catalog(ctx context.Context, refresh bool) ([]store.Item, []Source
 		wg.Add(1)
 		go func(i int, cat string) {
 			defer wg.Done()
-			label, items, err := store.LoadCatalog(ctx, a.GH, cat)
-			st := SourceStatus{Source: cat, Label: label, Count: len(items)}
+			label, items, warnings, err := store.LoadCatalog(ctx, a.GH, cat)
+			st := SourceStatus{Source: cat, Label: label, Count: len(items), Warnings: warnings}
 			if err != nil {
 				st.Error = err.Error()
+			} else if len(items) == 0 {
+				st.Warnings = append(st.Warnings, store.Warning{Kind: store.WarnEmpty})
 			}
 			parts[i] = part{items, st}
 		}(i, cat)

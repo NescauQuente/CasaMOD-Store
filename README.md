@@ -84,15 +84,61 @@ with read-only *Contents* access to the repositories you need is enough.
 
 A source is a GitHub repository (or a folder of one) added in **Settings**.
 Without a `store.json`, the store reads the repository tree (one API call)
-and lists:
+and decides what each folder is by the files **directly inside it**:
 
-- every folder with `mod.js` or `mod.css` at its root as a **mod**;
-- every folder with `project.json` (Wallpaper Engine) or `index.html` as a
-  **wallpaper**;
+| The folder has, at its root | It is a | Installed into |
+|---|---|---|
+| `mod.js` and/or `mod.css` | **mod** | `mod/<folder name>/` |
+| `project.json` or `index.html` (and no `mod.js`/`mod.css`) | **wallpaper** | `mod/wallpapers/<folder name>/` |
 
-taking only the outermost match and skipping hidden, `test(s)`, `docs`,
-`examples` and `node_modules` folders. The folder name is the id; name,
-description, version and preview come from `mod.json` / `project.json`.
+Rules:
+
+1. **The folder name is the id** (and the installed folder's name). Name it
+   the way it should appear in `mod/` or `mod/wallpapers/`.
+2. **Only the outermost match counts.** Once a folder is a mod or a
+   wallpaper, everything inside it is part of that item: a mod folder that
+   also contains a wallpaper folder hides that wallpaper.
+3. **Mod wins.** A folder with `mod.js`/`mod.css` *and* `project.json` or
+   `index.html` is a mod.
+4. A page at the very root of the source (`index.html` next to the README)
+   is not an item.
+5. Hidden folders (`.github`, …) and `test`, `tests`, `testdata`,
+   `fixtures`, `mock(s)`, `docs`, `doc`, `example(s)` and `node_modules`
+   are skipped.
+6. Name, description, version and preview come from `mod.json` (mods) or
+   `project.json` (wallpapers) when present; otherwise the folder name is
+   used.
+
+Example layout:
+
+```
+my-mods/                      (source: owner/my-mods)
+├── README.md
+├── hide-footer/              → mod "hide-footer"
+│   └── mod.css
+├── music-player-widget/      → mod "music-player-widget"
+│   ├── mod.js
+│   ├── mod.css
+│   └── mod.json              (optional: name, description, version)
+└── tests/                    → skipped
+
+my-wallpapers/                (source: owner/my-wallpapers)
+├── starry-orbit/             → wallpaper "starry-orbit"
+│   ├── index.html
+│   ├── project.json          (optional: title, description, preview)
+│   └── js/ …
+└── neural-plexus/            → wallpaper "neural-plexus"
+    └── index.html
+```
+
+The **Store** tab warns about a source when:
+
+- a folder has both mod and wallpaper files (it is read as a mod);
+- an item folder contains other item folders (they are ignored);
+- two folders have the same name (they would install into the same
+  folder, e.g. two `wallpaper-engine/` folders);
+- the source has no mods or wallpapers at all.
+
 New folders appear in the store on their own, and installed items follow
 every commit to their folder.
 

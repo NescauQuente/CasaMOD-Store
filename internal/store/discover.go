@@ -12,6 +12,22 @@ import (
 	"github.com/nescauquente/casamod-store/internal/installer"
 )
 
+// Warning kinds reported for a source.
+const (
+	WarnMixed   = "mixed"   // a folder has both mod and wallpaper files: read as a mod
+	WarnIgnored = "ignored" // an item folder holds other item folders, which are ignored
+	WarnEmpty   = "empty"   // the source has no mods or wallpapers
+	WarnSameID  = "same_id" // several folders share a name: they would install into the same folder
+)
+
+// Warning tells the user a source does not follow the folder rules.
+type Warning struct {
+	Kind  string   `json:"kind"`
+	Path  string   `json:"path,omitempty"`
+	Type  string   `json:"type,omitempty"`
+	Inner []string `json:"inner,omitempty"`
+}
+
 // maxDiscovered caps how many items one repository can add to the store.
 const maxDiscovered = 100
 
@@ -27,7 +43,7 @@ var skipDirs = map[string]bool{
 // wallpaper. Only the outermost match counts (a mod's own files are not
 // items), and test/doc folders are skipped. Names, descriptions and
 // previews come from mod.json or project.json when present.
-func Discover(ctx context.Context, gh *github.Client, src github.Source) (label string, items []Item, err error) {
+func Discover(ctx context.Context, gh *github.Client, src github.Source) (label string, items []Item, warnings []Warning, err error) {
 	label = path.Base(src.Repo)
 	ref := src.Branch
 	if ref == "" {
@@ -35,7 +51,7 @@ func Discover(ctx context.Context, gh *github.Client, src github.Source) (label 
 	}
 	tree, err := gh.Tree(ctx, src.Repo, ref)
 	if err != nil {
-		return label, nil, err
+		return label, nil, nil, err
 	}
 	prefix := ""
 	if src.Path != "" {
@@ -58,8 +74,13 @@ func Discover(ctx context.Context, gh *github.Client, src github.Source) (label 
 	}
 	types := map[string]string{}
 	for dir, names := range files {
+		isMod := names["mod.js"] || names["mod.css"]
+		isWallpaper := names["project.json"] || (names["index.html"] && dir != src.Path)
+		if isMod && isWallpaper {
+			warnings = append(warnings, Warning{Kind: WarnMixed, Path: dir, Type: installer.TypeMod})
+		}
 		switch {
-		case names["mod.js"] || names["mod.css"]:
+		case isMod:
 			types[dir] = installer.TypeMod
 		case names["project.json"]:
 			types[dir] = installer.TypeWallpaper
@@ -75,6 +96,19 @@ func Discover(ctx context.Context, gh *github.Client, src github.Source) (label 
 		}
 	}
 	sort.Strings(dirs)
+	for _, dir := range dirs {
+		var inner []string
+		for d := range types {
+			if d != dir && (dir == "" || strings.HasPrefix(d, dir+"/")) {
+				inner = append(inner, d)
+			}
+		}
+		if len(inner) > 0 {
+			sort.Strings(inner)
+			warnings = append(warnings, Warning{Kind: WarnIgnored, Path: dir, Type: types[dir], Inner: inner})
+		}
+	}
+	sort.Slice(warnings, func(i, j int) bool { return warnings[i].Path < warnings[j].Path })
 	if len(dirs) > maxDiscovered {
 		dirs = dirs[:maxDiscovered]
 	}
@@ -92,8 +126,17 @@ func Discover(ctx context.Context, gh *github.Client, src github.Source) (label 
 			Origin: OriginCatalog, OriginLabel: label,
 		})
 	}
+	byID := map[string][]string{}
+	for _, it := range items {
+		byID[it.Type+":"+it.ID] = append(byID[it.Type+":"+it.ID], it.Source.Path)
+	}
+	for _, it := range items {
+		if paths := byID[it.Type+":"+it.ID]; len(paths) > 1 && paths[0] == it.Source.Path {
+			warnings = append(warnings, Warning{Kind: WarnSameID, Path: it.ID, Type: it.Type, Inner: paths})
+		}
+	}
 	describe(ctx, gh, ref, items, files)
-	return label, items, nil
+	return label, items, warnings, nil
 }
 
 func skipped(dir string) bool {

@@ -319,6 +319,14 @@ func TestCatalogs(t *testing.T) {
 	if !missingErr {
 		t.Fatalf("missing catalog error not reported: %+v", sources)
 	}
+	// A source without any item is flagged.
+	e.gh.Push("me/empty", "main", "init", map[string]string{"README.md": "x"})
+	e.app.State.Config.Catalogs = []string{"me/empty"}
+	_, sources = e.app.Catalog(ctx, true)
+	if len(sources[0].Warnings) != 1 || sources[0].Warnings[0].Kind != store.WarnEmpty || sources[0].Error != "" {
+		t.Fatalf("empty source: %+v", sources[0])
+	}
+	e.app.State.Config.Catalogs = []string{"me/catalog", "https://github.com/me/missing"}
 	// Cached: no new requests.
 	before := e.gh.Count("/")
 	e.app.Catalog(ctx, false)
