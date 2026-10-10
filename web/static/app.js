@@ -5,7 +5,7 @@
   // ---------------------------------------------------------------- i18n
   var STRINGS = {
     en: {
-      "tab.store": "Store", "tab.installed": "Installed", "tab.updates": "Updates", "tab.settings": "Settings",
+      "credits.by": "by", "tab.store": "Store", "tab.installed": "Installed", "tab.updates": "Updates", "tab.settings": "Settings",
       "store.search": "Search mods and wallpapers", "store.refresh": "Refresh", "store.addUrl": "Add from GitHub URL",
       "store.empty": "Nothing found.", "store.clearSelection": "Clear", "store.installSelected": "Install selected",
       "store.selected": "{n} selected", "store.sourceError": "Could not load {source}: {error}",
@@ -49,7 +49,7 @@
       "err.network": "The store did not answer.",
     },
     pt: {
-      "tab.store": "Loja", "tab.installed": "Instalados", "tab.updates": "Atualizações", "tab.settings": "Configurações",
+      "credits.by": "por", "tab.store": "Loja", "tab.installed": "Instalados", "tab.updates": "Atualizações", "tab.settings": "Configurações",
       "store.search": "Buscar mods e wallpapers", "store.refresh": "Recarregar", "store.addUrl": "Adicionar por URL do GitHub",
       "store.empty": "Nada encontrado.", "store.clearSelection": "Limpar", "store.installSelected": "Instalar selecionados",
       "store.selected": "{n} selecionado(s)", "store.sourceError": "Não foi possível carregar {source}: {error}",

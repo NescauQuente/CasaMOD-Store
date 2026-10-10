@@ -13,8 +13,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/nescauquente/casamod-store/internal/app"
-	"github.com/nescauquente/casamod-store/web"
+	"github.com/usuariodejava/casamod-store/internal/app"
+	"github.com/usuariodejava/casamod-store/web"
 )
 
 // version and commit are set at build time with

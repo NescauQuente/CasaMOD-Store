@@ -5,14 +5,14 @@ import (
 	"errors"
 	"time"
 
-	"github.com/nescauquente/casamod-store/internal/github"
-	"github.com/nescauquente/casamod-store/internal/store"
+	"github.com/usuariodejava/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/store"
 )
 
 // The store's own image is published by this workflow on every push to main,
 // so the newest successful run tells which commit the "latest" image holds.
 const (
-	SelfRepo     = "NescauQuente/CasaMOD-Store"
+	SelfRepo     = "UsuarioDeJava/CasaMOD-Store"
 	SelfWorkflow = "docker-publish.yml"
 	SelfBranch   = "main"
 )

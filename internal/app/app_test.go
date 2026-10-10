@@ -15,10 +15,10 @@ import (
 	"testing/fstest"
 	"time"
 
-	"github.com/nescauquente/casamod-store/internal/fakegithub"
-	"github.com/nescauquente/casamod-store/internal/github"
-	"github.com/nescauquente/casamod-store/internal/notifier"
-	"github.com/nescauquente/casamod-store/internal/store"
+	"github.com/usuariodejava/casamod-store/internal/fakegithub"
+	"github.com/usuariodejava/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/notifier"
+	"github.com/usuariodejava/casamod-store/internal/store"
 )
 
 // fakeDocker records the restart calls made on a unix socket.

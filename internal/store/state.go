@@ -8,10 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
-	"github.com/nescauquente/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/github"
 )
 
 // Update policies.
@@ -42,7 +43,14 @@ type Config struct {
 
 // DefaultCatalogs are the sources every store starts with. Repositories
 // without a store.json are scanned for mods and wallpapers.
-var DefaultCatalogs = []string{"NescauQuente/CasaMODs", "NescauQuente/WE-Wallpapers"}
+var DefaultCatalogs = []string{"UsuarioDeJava/CasaMODs", "UsuarioDeJava/WE-Wallpapers"}
+
+// The GitHub account was renamed from oldOwner to Owner; saved sources and
+// installed items are moved to the new name on start.
+const (
+	Owner    = "UsuarioDeJava"
+	oldOwner = "NescauQuente"
+)
 
 // oldDefaultCatalog was the default before DefaultCatalogs; configs that
 // still hold only it are migrated.
@@ -128,6 +136,9 @@ func Load(dir string) (*State, error) {
 	if len(s.Config.Catalogs) == 1 && s.Config.Catalogs[0] == oldDefaultCatalog {
 		s.Config.Catalogs = append([]string(nil), DefaultCatalogs...)
 	}
+	for i, c := range s.Config.Catalogs {
+		s.Config.Catalogs[i] = renameOwner(c)
+	}
 	var inst installedFile
 	if err := readJSON(filepath.Join(dir, "installed.json"), &inst); err != nil {
 		return nil, err
@@ -138,9 +149,25 @@ func Load(dir string) (*State, error) {
 		if it.Policy != PolicyAuto {
 			it.Policy = PolicyNotify
 		}
+		it.Source.Repo = renameOwner(it.Source.Repo)
 		s.Items[it.Key()] = it
 	}
 	return s, nil
+}
+
+// renameOwner replaces the old account name in "owner/repo" and in GitHub
+// URLs ("github.com/owner/...", "raw.githubusercontent.com/owner/...").
+func renameOwner(s string) string {
+	if len(s) > len(oldOwner) && strings.EqualFold(s[:len(oldOwner)+1], oldOwner+"/") {
+		return Owner + s[len(oldOwner):]
+	}
+	for _, host := range []string{"github.com/", "githubusercontent.com/"} {
+		if i := strings.Index(strings.ToLower(s), host+strings.ToLower(oldOwner)+"/"); i >= 0 {
+			j := i + len(host)
+			return s[:j] + Owner + s[j+len(oldOwner):]
+		}
+	}
+	return s
 }
 
 func readJSON(path string, out any) error {

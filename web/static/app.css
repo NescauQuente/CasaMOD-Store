@@ -207,3 +207,5 @@ dialog .row.end { margin-top: 12px; }
 }
 #source-errors .banner { margin: 0 0 8px; }
 #source-errors:not(:empty) { margin-bottom: 14px; }
+.credits { text-align: center; color: var(--muted); font-size: 12px; padding: 0 16px 28px; }
+.credits a { color: var(--muted); }

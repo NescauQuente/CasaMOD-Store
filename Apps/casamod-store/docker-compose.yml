@@ -2,7 +2,7 @@ name: casamod-store
 services:
   casamod-store:
     container_name: casamod-store
-    image: ghcr.io/nescauquente/casamod-store:latest
+    image: ghcr.io/usuariodejava/casamod-store:latest
     ports:
       - target: 8418
         published: "8418"
@@ -35,9 +35,9 @@ x-casaos:
   main: casamod-store
   store_app_id: casamod-store
   category: Developer
-  author: NescauQuente
-  developer: NescauQuente
-  icon: https://cdn.jsdelivr.net/gh/NescauQuente/CasaMOD-Store@main/icon.png
+  author: UsuarioDeJava
+  developer: UsuarioDeJava
+  icon: https://cdn.jsdelivr.net/gh/UsuarioDeJava/CasaMOD-Store@main/icon.png
   description:
     en_us: A store for CasaMOD. Install, update and remove CasaMOD mods and wallpapers straight from GitHub, choose per item whether updates are applied automatically or only announced, and get a small notice on the CasaOS desktop when updates are waiting. Requires CasaMOD.
     pt_br: Uma loja para o CasaMOD. Instale, atualize e remova mods e wallpapers do CasaMOD direto do GitHub, escolha por item se as atualizações são aplicadas sozinhas ou só avisadas, e receba um aviso discreto na área de trabalho do CasaOS quando houver atualizações. Requer o CasaMOD.

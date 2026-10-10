@@ -186,6 +186,8 @@ try {
     await page.eval(`(() => { const s = document.getElementById("search"); s.value = "music"; s.dispatchEvent(new Event("input")); })()`);
     assert.equal(await page.eval(`document.querySelectorAll("#store-grid .card").length`), 1);
     await page.eval(`(() => { const s = document.getElementById("search"); s.value = ""; s.dispatchEvent(new Event("input")); })()`);
+    assert.deepEqual(await page.eval(`[...document.querySelectorAll(".credits a")].map(a => a.href)`),
+      ["https://github.com/UsuarioDeJava/CasaMOD-Store", "https://github.com/UsuarioDeJava"]);
     await shot("01-store");
   });
 
@@ -339,7 +341,7 @@ try {
     await page.waitFor(`document.getElementById("updates-empty").hidden === false`);
     assert.equal(await page.eval(`!!document.querySelector('[data-key="store:casamod-store"]')`), false);
     const r = await fetch(GH + "/__run", { method: "POST", body: JSON.stringify({
-      repo: "NescauQuente/CasaMOD-Store", workflow: "docker-publish.yml", branch: "main", sha: "2222222222222222222222222222222222222222" }) });
+      repo: "UsuarioDeJava/CasaMOD-Store", workflow: "docker-publish.yml", branch: "main", sha: "2222222222222222222222222222222222222222" }) });
     assert.ok(r.ok);
     await page.click("#btn-check");
     await page.waitFor(`!!document.querySelector('[data-key="store:casamod-store"]')`, { message: "self row" });

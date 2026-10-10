@@ -5,8 +5,8 @@ remove CasaMOD **mods** and **wallpapers** straight from GitHub, from a web UI
 that opens from the app icon in CasaOS.
 
 - **Store**: items from source repositories (by default
-  [CasaMODs](https://github.com/NescauQuente/CasaMODs) and
-  [WE-Wallpapers](https://github.com/NescauQuente/WE-Wallpapers)), the mods
+  [CasaMODs](https://github.com/UsuarioDeJava/CasaMODs) and
+  [WE-Wallpapers](https://github.com/UsuarioDeJava/WE-Wallpapers)), the mods
   that ship with CasaMOD, or any GitHub repository/folder pasted as a URL.
 - **Updates**: checked every 6 hours (configurable) or on demand. Per item you
   choose *Notify me* (default) or *Update automatically*.
@@ -51,7 +51,7 @@ This repository is also a CasaOS app store source (`Apps/casamod-store/`).
 
 1. Install CasaMOD first.
 2. In CasaOS: **App Store → More apps**, add
-   `https://github.com/NescauQuente/CasaMOD-Store/archive/refs/heads/main.zip`.
+   `https://github.com/UsuarioDeJava/CasaMOD-Store/archive/refs/heads/main.zip`.
 3. Install **CasaMOD Store** from the App Store and open it from its icon
    (port `8418`).
 
@@ -212,5 +212,5 @@ go run ./cmd/casamod-store    # with CASAMOD_STORE_DATA / CASAMOD_DIR pointing t
 - `tests/`: browser tests: a dependency-free Chrome DevTools harness, a fake
   GitHub server and a mock CasaOS page that loads the notifier.
 
-The image is published to `ghcr.io/nescauquente/casamod-store` by
+The image is published to `ghcr.io/usuariodejava/casamod-store` by
 `.github/workflows/docker-publish.yml` on pushes to `main` and on `v*` tags.

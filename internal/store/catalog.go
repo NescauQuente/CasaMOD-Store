@@ -12,8 +12,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/nescauquente/casamod-store/internal/github"
-	"github.com/nescauquente/casamod-store/internal/installer"
+	"github.com/usuariodejava/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/installer"
 )
 
 // Item is an entry shown in the store.

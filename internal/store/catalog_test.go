@@ -3,7 +3,7 @@ package store
 import (
 	"testing"
 
-	"github.com/nescauquente/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/github"
 )
 
 func TestParseCatalogRef(t *testing.T) {

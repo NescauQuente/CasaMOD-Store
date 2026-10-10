@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nescauquente/casamod-store/internal/github"
-	"github.com/nescauquente/casamod-store/internal/store"
+	"github.com/usuariodejava/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/store"
 )
 
 // Handler returns the HTTP handler: the JSON API under /api/ and the web UI.

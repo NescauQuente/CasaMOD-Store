@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/nescauquente/casamod-store/internal/installer"
-	"github.com/nescauquente/casamod-store/internal/notifier"
-	"github.com/nescauquente/casamod-store/internal/store"
+	"github.com/usuariodejava/casamod-store/internal/installer"
+	"github.com/usuariodejava/casamod-store/internal/notifier"
+	"github.com/usuariodejava/casamod-store/internal/store"
 )
 
 // EnsureNotifier installs, updates or removes the notifier mini-mod according

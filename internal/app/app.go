@@ -15,11 +15,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nescauquente/casamod-store/internal/docker"
-	"github.com/nescauquente/casamod-store/internal/github"
-	"github.com/nescauquente/casamod-store/internal/installer"
-	"github.com/nescauquente/casamod-store/internal/notifier"
-	"github.com/nescauquente/casamod-store/internal/store"
+	"github.com/usuariodejava/casamod-store/internal/docker"
+	"github.com/usuariodejava/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/installer"
+	"github.com/usuariodejava/casamod-store/internal/notifier"
+	"github.com/usuariodejava/casamod-store/internal/store"
 )
 
 // App is the running service.

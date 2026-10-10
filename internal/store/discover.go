@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/nescauquente/casamod-store/internal/github"
-	"github.com/nescauquente/casamod-store/internal/installer"
+	"github.com/usuariodejava/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/installer"
 )
 
 // Warning kinds reported for a source.

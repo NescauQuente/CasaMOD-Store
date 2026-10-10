@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/nescauquente/casamod-store/internal/fakegithub"
-	"github.com/nescauquente/casamod-store/internal/github"
+	"github.com/usuariodejava/casamod-store/internal/fakegithub"
+	"github.com/usuariodejava/casamod-store/internal/github"
 )
 
 func TestDiscover(t *testing.T) {
@@ -122,9 +122,21 @@ func TestOldDefaultCatalogIsMigrated(t *testing.T) {
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "config.json"), []byte(`{"catalogs":["`+oldDefaultCatalog+`"],"check_interval_hours":6}`), 0o600)
 	s, err := Load(dir)
-	if err != nil || len(s.Config.Catalogs) != 2 || s.Config.Catalogs[0] != "NescauQuente/CasaMODs" {
+	if err != nil || len(s.Config.Catalogs) != 2 || s.Config.Catalogs[0] != "UsuarioDeJava/CasaMODs" {
 		t.Fatalf("%+v %v", s.Config.Catalogs, err)
 	}
+	// Sources and installed items under the old account name are renamed.
+	os.WriteFile(filepath.Join(dir, "config.json"), []byte(`{"catalogs":["NescauQuente/CasaMODs","https://github.com/nescauquente/WE-Wallpapers/tree/main/x","other/repo"]}`), 0o600)
+	os.WriteFile(filepath.Join(dir, "installed.json"), []byte(`{"items":[{"id":"a","type":"mod","source":{"repo":"NescauQuente/CasaMODs","path":"a"}},{"id":"b","type":"mod","source":{"repo":"other/NescauQuente","path":"b"}}]}`), 0o644)
+	s, err = Load(dir)
+	if err != nil || s.Config.Catalogs[0] != "UsuarioDeJava/CasaMODs" ||
+		s.Config.Catalogs[1] != "https://github.com/UsuarioDeJava/WE-Wallpapers/tree/main/x" || s.Config.Catalogs[2] != "other/repo" {
+		t.Fatalf("catalogs: %+v %v", s.Config.Catalogs, err)
+	}
+	if s.Items["mod:a"].Source.Repo != "UsuarioDeJava/CasaMODs" || s.Items["mod:b"].Source.Repo != "other/NescauQuente" {
+		t.Fatalf("items: %+v %+v", s.Items["mod:a"].Source, s.Items["mod:b"].Source)
+	}
+	os.Remove(filepath.Join(dir, "installed.json"))
 	// Catalogs the user changed are kept.
 	os.WriteFile(filepath.Join(dir, "config.json"), []byte(`{"catalogs":["a/b"]}`), 0o600)
 	if s, _ := Load(dir); len(s.Config.Catalogs) != 1 || s.Config.Catalogs[0] != "a/b" {
