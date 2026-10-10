@@ -158,7 +158,7 @@ func (a *App) restartDone(err error) {
 	if err != nil {
 		a.Logf("error", "Restarting CasaMOD failed: %v", err)
 	} else {
-		a.Logf("info", "CasaMOD restarted: reload the CasaOS page to see the changes")
+		a.Logf("info", "CasaMOD restarted")
 	}
 }
 

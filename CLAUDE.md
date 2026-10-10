@@ -7,7 +7,9 @@ wallpapers from GitHub, with a web UI and a notifier mini-mod. See README.md.
 - Reply to the user in Portuguese (pt-BR); code, comments and docs in English.
 - The user's CasaOS (`http://the-maquina`, CasaOS 0.4.15) is only reachable on
   their LAN/Tailscale: test against the mocks, never against the real server.
-- Commits as NescauQuente; no PR unless asked.
+- Commits as NescauQuente, straight to `main`; no PR unless asked.
+- UI text: only the titles/labels that are needed. No hints, explanations or
+  "(this app)"-style asides in the web UI or notifier (docs go in README).
 - On the user's (weak) PC run the browser suite once per change; in the cloud
   it can run every time.
 

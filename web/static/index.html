@@ -54,11 +54,10 @@
 
     <!-- Installed -->
     <section id="tab-installed" class="tab" hidden>
-      <h2 data-i18n="installed.title">Installed by the store</h2>
+      <h2 data-i18n="installed.title">Managed</h2>
       <div class="list" id="installed-list"></div>
-      <p class="empty" id="installed-empty" hidden data-i18n="installed.empty">Nothing installed by the store yet.</p>
-      <h2 data-i18n="manual.title">Installed manually</h2>
-      <p class="hint" data-i18n="manual.hint">These folders were not installed by the store, so it never changes or removes them.</p>
+      <p class="empty" id="installed-empty" hidden data-i18n="installed.empty">Nothing installed.</p>
+      <h2 data-i18n="manual.title">Manual</h2>
       <div class="list" id="manual-list"></div>
       <p class="empty" id="manual-empty" hidden data-i18n="manual.empty">None.</p>
     </section>
@@ -82,33 +81,30 @@
       <form id="settings-form" class="settings" autocomplete="off">
         <fieldset>
           <legend data-i18n="settings.github">GitHub</legend>
-          <label for="set-token" data-i18n="settings.token">Access token (optional)</label>
+          <label for="set-token" data-i18n="settings.token">Token</label>
           <div class="row">
-            <input type="password" id="set-token" placeholder="ghp_… / github_pat_…">
+            <input type="password" id="set-token" placeholder="ghp_…">
             <button type="button" class="btn" id="btn-clear-token" data-i18n="settings.clearToken">Remove token</button>
           </div>
-          <p class="hint"><span id="token-state"></span> <span data-i18n="settings.tokenHint">Needed for private repositories and to raise the API limit from 60 to 5000 requests per hour. A fine-grained token with read-only "Contents" access is enough. It is stored only in this container.</span></p>
-          <label for="set-catalogs" data-i18n="settings.catalogs">Catalogs (one per line)</label>
+          <label for="set-catalogs" data-i18n="settings.catalogs">Catalogs</label>
           <textarea id="set-catalogs" rows="3" spellcheck="false"></textarea>
-          <p class="hint" data-i18n="settings.catalogsHint">A store.json file in a GitHub repository: owner/repo, a GitHub URL, or a raw URL.</p>
-          <label class="check"><input type="checkbox" id="set-casamod-mods"> <span data-i18n="settings.casamodMods">Show the mods that come with CasaMOD</span></label>
+          <label class="check"><input type="checkbox" id="set-casamod-mods"> <span data-i18n="settings.casamodMods">CasaMOD mods</span></label>
         </fieldset>
         <fieldset>
           <legend data-i18n="settings.updates">Updates</legend>
-          <label for="set-interval" data-i18n="settings.interval">Check every (hours, 0 = never)</label>
+          <label for="set-interval" data-i18n="settings.interval">Check every (hours)</label>
           <input type="number" id="set-interval" min="0" max="720" step="0.5">
-          <label class="check"><input type="checkbox" id="set-notifier"> <span data-i18n="settings.notifier">Show a notice on the CasaOS desktop when updates are waiting</span></label>
-          <label for="set-public-url" data-i18n="settings.publicUrl">Store address used by the notice (optional)</label>
-          <input type="url" id="set-public-url" placeholder="http://casaos.local:8418">
-          <label for="set-port" data-i18n="settings.port">Store port (used when the address is empty)</label>
+          <label class="check"><input type="checkbox" id="set-notifier"> <span data-i18n="settings.notifier">Notice on CasaOS</span></label>
+          <label for="set-public-url" data-i18n="settings.publicUrl">Store address</label>
+          <input type="url" id="set-public-url">
+          <label for="set-port" data-i18n="settings.port">Store port</label>
           <input type="number" id="set-port" min="1" max="65535">
         </fieldset>
         <fieldset>
           <legend>CasaMOD</legend>
-          <label for="set-container" data-i18n="settings.container">CasaMOD container name</label>
+          <label for="set-container" data-i18n="settings.container">Container</label>
           <input type="text" id="set-container">
-          <p class="hint" data-i18n="settings.containerHint">Restarted after a mod is added or removed, so CasaMOD loads it.</p>
-          <div class="row"><button type="button" class="btn" id="btn-restart" data-i18n="settings.restartNow">Restart CasaMOD now</button></div>
+          <div class="row"><button type="button" class="btn" id="btn-restart" data-i18n="settings.restartNow">Restart CasaMOD</button></div>
         </fieldset>
         <div class="row end"><button type="submit" class="btn primary" id="btn-save-settings" data-i18n="settings.save">Save</button></div>
       </form>
@@ -119,7 +115,7 @@
   <dialog id="dlg-url">
     <form method="dialog" id="url-form">
       <h3 data-i18n="url.title">Add from GitHub</h3>
-      <label for="url-input" data-i18n="url.url">Repository or folder URL</label>
+      <label for="url-input" data-i18n="url.url">URL</label>
       <div class="row">
         <input type="text" id="url-input" placeholder="https://github.com/owner/repo/tree/main/my-mod" spellcheck="false">
         <button type="button" class="btn" id="btn-resolve" data-i18n="url.read">Read</button>
@@ -127,12 +123,12 @@
       <div id="url-details" hidden>
         <div class="two">
           <div><label for="url-repo" data-i18n="url.repo">Repository</label><input type="text" id="url-repo"></div>
-          <div><label for="url-branch" data-i18n="url.branch">Branch (empty = default)</label><input type="text" id="url-branch"></div>
+          <div><label for="url-branch" data-i18n="url.branch">Branch</label><input type="text" id="url-branch"></div>
         </div>
-        <label for="url-path" data-i18n="url.path">Folder in the repository (empty = root)</label>
+        <label for="url-path" data-i18n="url.path">Folder</label>
         <input type="text" id="url-path">
         <div class="two">
-          <div><label for="url-id" data-i18n="url.id">Folder name (id)</label><input type="text" id="url-id"></div>
+          <div><label for="url-id" data-i18n="url.id">ID</label><input type="text" id="url-id"></div>
           <div><label for="url-type" data-i18n="url.type">Type</label>
             <select id="url-type"><option value="mod" data-i18n="type.mod">Mod</option><option value="wallpaper" data-i18n="type.wallpaper">Wallpaper</option></select></div>
         </div>

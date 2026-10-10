@@ -270,7 +270,7 @@ try {
     await page.click("#btn-check");
     await page.waitFor(`document.querySelectorAll("#updates-list .row-item").length === 1`, { message: "1 update row" });
     assert.equal(await page.eval(`document.querySelector("#updates-list .row-item").dataset.key`), "mod:live-wallpapers");
-    assert.match(await page.text("#updates-list"), /live v2/);
+    assert.match(await page.text("#updates-list .sub"), /[0-9a-f]{7} → [0-9a-f]{7}/);
     assert.equal(await page.text("#count-updates"), "1");
     // notify: not applied yet; auto: applied.
     assert.equal(readFileSync(join(modDir, "live-wallpapers", "mod.js"), "utf8"), "console.log('live v1')");
@@ -337,16 +337,13 @@ try {
   await test("store announces a new version of itself (UI and notifier)", async () => {
     await page.goto(STORE + "/?lang=pt#updates");
     await page.waitFor(`document.getElementById("updates-empty").hidden === false`);
-    assert.equal(await page.eval(`!!document.getElementById("banner-self")`), false);
+    assert.equal(await page.eval(`!!document.querySelector('[data-key="store:casamod-store"]')`), false);
     const r = await fetch(GH + "/__run", { method: "POST", body: JSON.stringify({
       repo: "NescauQuente/CasaMOD-Store", workflow: "docker-publish.yml", branch: "main", sha: "2222222222222222222222222222222222222222" }) });
     assert.ok(r.ok);
     await page.click("#btn-check");
-    await page.waitFor(`!!document.getElementById("banner-self")`, { message: "self banner" });
-    assert.match(await page.text("#banner-self"), /Verificar e atualizar/);
-    assert.equal(await page.eval(`document.querySelector("#banner-self a").href`),
-      "https://github.com/NescauQuente/CasaMOD-Store/compare/1111111111111111111111111111111111111111...2222222222222222222222222222222222222222");
-    assert.match(await page.text('#updates-list [data-key="store:casamod-store"]'), /Rodando 1111111, imagem mais nova 2222222/);
+    await page.waitFor(`!!document.querySelector('[data-key="store:casamod-store"]')`, { message: "self row" });
+    assert.equal(await page.text('#updates-list [data-key="store:casamod-store"] .sub'), "1111111 → 2222222");
     assert.equal(await page.text("#count-updates"), "1");
     await shot("05b-self-update");
     await casa.reload();
@@ -376,14 +373,14 @@ try {
   await test("settings: token is saved but never sent back", async () => {
     await page.goto(STORE + "/?lang=en#settings");
     await page.waitFor(`document.getElementById("set-port").value === "${storePort}"`);
-    assert.match(await page.text("#token-state"), /No token/);
+    assert.equal(await page.eval(`document.getElementById("set-token").placeholder`), "ghp_…");
     await page.eval(`(() => {
       document.getElementById("set-token").value = "ghp_secret123";
       document.getElementById("set-interval").value = "12";
       document.getElementById("settings-form").dispatchEvent(new Event("input"));
     })()`);
     await page.click("#btn-save-settings");
-    await page.waitFor(`/A token is saved/.test(document.getElementById("token-state").textContent)`);
+    await page.waitFor(`document.getElementById("set-token").placeholder === "Token saved"`);
     const state = await (await fetch(STORE + "/api/state")).text();
     assert.ok(!state.includes("ghp_secret123"), "token leaked");
     const cfg = JSON.parse(readFileSync(join(dataDir, "config.json"), "utf8"));
@@ -391,16 +388,16 @@ try {
     assert.equal(cfg.check_interval_hours, 12);
     await shot("06-settings");
     await page.click("#btn-clear-token");
-    await page.waitFor(`/No token/.test(document.getElementById("token-state").textContent)`);
+    await page.waitFor(`document.getElementById("set-token").placeholder === "ghp_…"`);
   });
 
-  await test("restart failure is shown with a retry button", async () => {
+  await test("missing Docker socket is shown", async () => {
     await new Promise((r) => docker.close(r));
     rmSync(dockerSock, { force: true });
     await page.goto(STORE + "/?lang=en#store");
     await page.waitFor(`!!document.querySelector('.card[data-key="mod:music-player"] .actions .btn')`);
     await page.click(`.card[data-key="mod:music-player"] .actions .btn`);
-    await page.waitFor(`!!document.getElementById("banner-docker") && !!document.getElementById("banner-restart")`, { message: "banners", timeout: 15000 });
+    await page.waitFor(`!!document.getElementById("banner-docker") && !document.getElementById("banner-restart")`, { message: "banners", timeout: 15000 });
     await shot("07-restart-banner");
   });
 

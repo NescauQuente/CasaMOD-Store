@@ -11,45 +11,38 @@
       "store.selected": "{n} selected", "store.sourceError": "Could not load {source}: {error}",
       "filter.all": "All", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "All sources",
       "type.mod": "Mod", "type.wallpaper": "Wallpaper",
-      "state.installed": "Installed", "state.update": "Update available", "state.manual": "Installed manually",
+      "state.installed": "Installed", "state.update": "Update available", "state.manual": "Manual",
       "state.missing": "Folder missing", "state.upToDate": "Up to date", "state.error": "Check failed",
       "common.install": "Install", "common.update": "Update", "common.remove": "Remove", "common.cancel": "Cancel",
       "common.reinstall": "Reinstall", "common.replace": "Replace",
-      "installed.title": "Installed by the store", "installed.empty": "Nothing installed by the store yet.",
-      "manual.title": "Installed manually", "manual.hint": "These folders were not installed by the store, so it never changes or removes them.",
+      "installed.title": "Managed", "installed.empty": "Nothing installed.",
+      "manual.title": "Manual",
       "manual.empty": "None.",
       "policy.notify": "Notify me", "policy.auto": "Update automatically",
       "updates.check": "Check now", "updates.updateAll": "Update all", "updates.empty": "Everything is up to date.",
       "updates.last": "Last check: {when}", "updates.never": "Not checked yet", "updates.next": "next: {when}",
       "updates.off": "automatic checks are off",
       "log.title": "Activity",
-      "settings.github": "GitHub", "settings.token": "Access token (optional)", "settings.clearToken": "Remove token",
-      "settings.tokenHint": "Needed for private repositories and to raise the API limit from 60 to 5000 requests per hour. A fine-grained token with read-only \"Contents\" access is enough. It is stored only in this container.",
-      "settings.tokenSet": "A token is saved.", "settings.tokenUnset": "No token saved.",
-      "settings.catalogs": "Catalogs (one per line)",
-      "settings.catalogsHint": "A store.json file in a GitHub repository: owner/repo, a GitHub URL, or a raw URL.",
-      "settings.casamodMods": "Show the mods that come with CasaMOD",
-      "settings.updates": "Updates", "settings.interval": "Check every (hours, 0 = never)",
-      "settings.notifier": "Show a notice on the CasaOS desktop when updates are waiting",
-      "settings.publicUrl": "Store address used by the notice (optional)",
-      "settings.port": "Store port (used when the address is empty)",
-      "settings.container": "CasaMOD container name",
-      "settings.containerHint": "Restarted after a mod is added or removed, so CasaMOD loads it.",
-      "settings.restartNow": "Restart CasaMOD now", "settings.save": "Save", "settings.saved": "Settings saved.",
-      "url.title": "Add from GitHub", "url.url": "Repository or folder URL", "url.read": "Read",
-      "url.repo": "Repository", "url.branch": "Branch (empty = default)", "url.path": "Folder in the repository (empty = root)",
-      "url.id": "Folder name (id)", "url.type": "Type", "url.policy": "Updates",
-      "banner.pending": "CasaMOD will restart in a moment to load the new mods. Reload CasaOS afterwards.",
-      "banner.needed": "CasaMOD must be restarted to load the changes: {error}",
-      "self.banner": "A new version of CasaMOD Store is available. Update it in CasaOS: on the app icon open the menu (⋮) and choose \"Check then update\".",
-      "self.name": "CasaMOD Store (this app)", "self.changes": "What changed",
-      "self.row": "Running {current}, newest image {latest} from {date}. Update it from the app menu in CasaOS.",
-      "banner.noDocker": "The Docker socket is not mounted: after adding or removing mods, restart the CasaMOD app yourself.",
-      "banner.restart": "Restart now", "banner.restarted": "CasaMOD restarted. Reload the CasaOS page.",
+      "settings.github": "GitHub", "settings.tokenSaved": "Token saved", "settings.token": "Token", "settings.clearToken": "Remove token",
+      "settings.catalogs": "Catalogs",
+      "settings.casamodMods": "CasaMOD mods",
+      "settings.updates": "Updates", "settings.interval": "Check every (hours)",
+      "settings.notifier": "Notice on CasaOS",
+      "settings.publicUrl": "Store address",
+      "settings.port": "Store port",
+      "settings.container": "Container",
+      "settings.restartNow": "Restart CasaMOD", "settings.save": "Save", "settings.saved": "Saved.",
+      "url.title": "Add from GitHub", "url.url": "URL", "url.read": "Read",
+      "url.repo": "Repository", "url.branch": "Branch", "url.path": "Folder",
+      "url.id": "ID", "url.type": "Type", "url.policy": "Updates",
+      "banner.pending": "Restarting CasaMOD…",
+      "banner.needed": "CasaMOD restart failed: {error}",
+      "self.name": "CasaMOD Store",
+      "banner.noDocker": "Docker socket not mounted: restart CasaMOD manually.",
+      "banner.restart": "Restart now", "banner.restarted": "CasaMOD restarted.",
       "confirm.remove": "Remove {name}?", "done.installed": "Installed {name}.", "done.updated": "Updated {name}.",
-      "done.removed": "Removed {name}.", "done.checked": "Update check finished.", "done.nothing": "Nothing to update.",
+      "done.removed": "Removed {name}.", "done.checked": "Check finished.", "done.nothing": "Nothing to update.",
       "err.network": "The store did not answer.",
-      "item.source": "Source", "item.version": "Version {sha} from {date}", "item.latest": "latest {sha}"
     },
     pt: {
       "tab.store": "Loja", "tab.installed": "Instalados", "tab.updates": "Atualizações", "tab.settings": "Configurações",
@@ -58,45 +51,38 @@
       "store.selected": "{n} selecionado(s)", "store.sourceError": "Não foi possível carregar {source}: {error}",
       "filter.all": "Todos", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "Todas as origens",
       "type.mod": "Mod", "type.wallpaper": "Wallpaper",
-      "state.installed": "Instalado", "state.update": "Atualização disponível", "state.manual": "Instalado manualmente",
+      "state.installed": "Instalado", "state.update": "Atualização disponível", "state.manual": "Manual",
       "state.missing": "Pasta ausente", "state.upToDate": "Atualizado", "state.error": "Falha na verificação",
       "common.install": "Instalar", "common.update": "Atualizar", "common.remove": "Remover", "common.cancel": "Cancelar",
       "common.reinstall": "Reinstalar", "common.replace": "Substituir",
-      "installed.title": "Instalados pela loja", "installed.empty": "Nada instalado pela loja ainda.",
-      "manual.title": "Instalados manualmente", "manual.hint": "Estas pastas não foram instaladas pela loja, então ela nunca as altera nem remove.",
+      "installed.title": "Gerenciados", "installed.empty": "Nada instalado.",
+      "manual.title": "Manuais",
       "manual.empty": "Nenhum.",
       "policy.notify": "Só avisar", "policy.auto": "Atualizar sozinho",
       "updates.check": "Verificar agora", "updates.updateAll": "Atualizar tudo", "updates.empty": "Tudo atualizado.",
       "updates.last": "Última verificação: {when}", "updates.never": "Ainda não verificado", "updates.next": "próxima: {when}",
       "updates.off": "verificação automática desligada",
       "log.title": "Atividade",
-      "settings.github": "GitHub", "settings.token": "Token de acesso (opcional)", "settings.clearToken": "Remover token",
-      "settings.tokenHint": "Necessário para repositórios privados e para subir o limite da API de 60 para 5000 requisições por hora. Um token fine-grained com acesso somente leitura a \"Contents\" basta. Ele fica guardado apenas neste container.",
-      "settings.tokenSet": "Há um token salvo.", "settings.tokenUnset": "Nenhum token salvo.",
-      "settings.catalogs": "Catálogos (um por linha)",
-      "settings.catalogsHint": "Um arquivo store.json num repositório do GitHub: dono/repo, uma URL do GitHub ou uma URL raw.",
-      "settings.casamodMods": "Mostrar os mods que vêm com o CasaMOD",
-      "settings.updates": "Atualizações", "settings.interval": "Verificar a cada (horas, 0 = nunca)",
-      "settings.notifier": "Mostrar um aviso na área de trabalho do CasaOS quando houver atualizações",
-      "settings.publicUrl": "Endereço da loja usado pelo aviso (opcional)",
-      "settings.port": "Porta da loja (usada quando o endereço está vazio)",
-      "settings.container": "Nome do container do CasaMOD",
-      "settings.containerHint": "Reiniciado depois que um mod é adicionado ou removido, para o CasaMOD carregá-lo.",
-      "settings.restartNow": "Reiniciar o CasaMOD agora", "settings.save": "Salvar", "settings.saved": "Configurações salvas.",
-      "url.title": "Adicionar do GitHub", "url.url": "URL do repositório ou da pasta", "url.read": "Ler",
-      "url.repo": "Repositório", "url.branch": "Branch (vazio = padrão)", "url.path": "Pasta no repositório (vazio = raiz)",
-      "url.id": "Nome da pasta (id)", "url.type": "Tipo", "url.policy": "Atualizações",
-      "banner.pending": "O CasaMOD vai reiniciar em instantes para carregar os novos mods. Depois recarregue o CasaOS.",
-      "banner.needed": "É preciso reiniciar o CasaMOD para carregar as mudanças: {error}",
-      "self.banner": "Há uma versão nova do CasaMOD Store. Atualize pelo CasaOS: no ícone do app, abra o menu (⋮) e escolha \"Verificar e atualizar\".",
-      "self.name": "CasaMOD Store (este app)", "self.changes": "O que mudou",
-      "self.row": "Rodando {current}, imagem mais nova {latest} de {date}. Atualize pelo menu do app no CasaOS.",
-      "banner.noDocker": "O socket do Docker não está montado: depois de adicionar ou remover mods, reinicie o app CasaMOD você mesmo.",
-      "banner.restart": "Reiniciar agora", "banner.restarted": "CasaMOD reiniciado. Recarregue a página do CasaOS.",
+      "settings.github": "GitHub", "settings.tokenSaved": "Token salvo", "settings.token": "Token", "settings.clearToken": "Remover token",
+      "settings.catalogs": "Catálogos",
+      "settings.casamodMods": "Mods do CasaMOD",
+      "settings.updates": "Atualizações", "settings.interval": "Verificar a cada (horas)",
+      "settings.notifier": "Aviso no CasaOS",
+      "settings.publicUrl": "Endereço da loja",
+      "settings.port": "Porta da loja",
+      "settings.container": "Container",
+      "settings.restartNow": "Reiniciar CasaMOD", "settings.save": "Salvar", "settings.saved": "Salvo.",
+      "url.title": "Adicionar do GitHub", "url.url": "URL", "url.read": "Ler",
+      "url.repo": "Repositório", "url.branch": "Branch", "url.path": "Pasta",
+      "url.id": "ID", "url.type": "Tipo", "url.policy": "Atualizações",
+      "banner.pending": "Reiniciando o CasaMOD…",
+      "banner.needed": "Falha ao reiniciar o CasaMOD: {error}",
+      "self.name": "CasaMOD Store",
+      "banner.noDocker": "Socket do Docker não montado: reinicie o CasaMOD manualmente.",
+      "banner.restart": "Reiniciar agora", "banner.restarted": "CasaMOD reiniciado.",
       "confirm.remove": "Remover {name}?", "done.installed": "{name} instalado.", "done.updated": "{name} atualizado.",
       "done.removed": "{name} removido.", "done.checked": "Verificação concluída.", "done.nothing": "Nada para atualizar.",
       "err.network": "A loja não respondeu.",
-      "item.source": "Origem", "item.version": "Versão {sha} de {date}", "item.latest": "mais recente {sha}"
     }
   };
   var LANG = (navigator.language || "en").toLowerCase().indexOf("pt") === 0 ? "pt" : "en";
@@ -264,24 +250,13 @@
 
   function selfUpdate() { return state.self && state.self.has_update ? state.self : null; }
 
-  function selfChangesURL(s) {
-    return "https://github.com/NescauQuente/CasaMOD-Store/compare/" + s.commit + "..." + s.latest_sha;
-  }
-
   function renderBanners() {
     var box = $("banners");
     box.textContent = "";
-    var self = selfUpdate();
-    if (self) {
-      box.appendChild(el("div", { class: "banner info", id: "banner-self" }, [
-        el("span", { text: t("self.banner") }),
-        el("a", { href: selfChangesURL(self), target: "_blank", rel: "noopener", text: t("self.changes") + " ↗" })
-      ]));
-    }
     var r = state.restart || {};
     if (r.pending) {
       box.appendChild(el("div", { class: "banner info", id: "banner-pending" }, [el("span", { text: t("banner.pending") })]));
-    } else if (r.needed) {
+    } else if (r.needed && state.docker_available) {
       box.appendChild(el("div", { class: "banner err", id: "banner-restart" }, [
         el("span", { text: t("banner.needed", { error: r.last_error || "" }) }),
         el("button", { class: "btn", text: t("banner.restart"), onclick: restartNow })
@@ -416,11 +391,10 @@
     var sub = [
       el("a", { href: sourceURL(it.source), target: "_blank", rel: "noopener", text: sourceText(it.source) }),
       " · ",
-      t("item.version", { sha: short(it.sha), date: fmtDate(it.updated_at) })
+      short(it.sha)
     ];
     if (it.has_update) {
-      sub.push(" → " + t("item.latest", { sha: short(it.latest_sha) }));
-      if (it.latest_message) sub.push(" (" + it.latest_message + ")");
+      sub.push(" → " + short(it.latest_sha));
     }
     var controls = [policySelect(it)];
     if (it.has_update || it.missing) {
@@ -465,11 +439,9 @@
       list.appendChild(el("div", { class: "row-item", dataset: { key: "store:casamod-store" } }, [
         el("div", { class: "info" }, [
           el("div", { class: "name" }, [t("self.name"), el("span", { class: "badge accent", text: t("state.update") })]),
-          el("div", { class: "sub", text: t("self.row", { current: short(self.commit), latest: short(self.latest_sha), date: fmtDate(self.latest_date) }) })
+          el("div", { class: "sub", text: short(self.commit) + " → " + short(self.latest_sha) })
         ]),
-        el("div", { class: "controls" }, [
-          el("a", { class: "btn small", href: selfChangesURL(self), target: "_blank", rel: "noopener", text: t("self.changes") + " ↗" })
-        ])
+        el("div")
       ]));
     }
     ups.forEach(function (it) { list.appendChild(installedRow(it, true)); });
@@ -493,7 +465,7 @@
   function renderSettings() {
     if (settingsDirty) return;
     var c = state.config;
-    $("token-state").textContent = c.has_token ? t("settings.tokenSet") : t("settings.tokenUnset");
+    $("set-token").placeholder = c.has_token ? t("settings.tokenSaved") : "ghp_…";
     $("btn-clear-token").disabled = !c.has_token;
     $("set-catalogs").value = (c.catalogs || []).join("\n");
     $("set-casamod-mods").checked = c.include_casamod_mods;
