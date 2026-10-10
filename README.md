@@ -180,7 +180,8 @@ place.
 - An item has an update when a newer commit touched **its folder**; commits
   elsewhere in the repository do not count.
 - The store's own image records the commit it was built from; each check
-  compares it with the last successful `docker-publish.yml` run on `main`.
+  compares it with the commit of the `published` tag, which CI moves to
+  every commit it publishes.
 - State lives in `/DATA/AppData/casamod-store`: `config.json` (settings and the
   optional GitHub token) and `installed.json` (source, commit and update
   policy of each item).
@@ -355,6 +356,7 @@ commit used by the self-update check.
   GitHub server and a mock CasaOS page that loads the notifier.
 - `Apps/casamod-store/`: the CasaOS app (app store source layout).
 
-The image is published to `ghcr.io/usuariodejava/casamod-store` by
-`.github/workflows/docker-publish.yml` on pushes to `main` that change the
-program and on `v*` tags.
+`.github/workflows/ci.yml` runs the tests on every push and pull request.
+After they pass, on pushes to `main` that change the program and on `v*`
+tags, it publishes the image to `ghcr.io/usuariodejava/casamod-store` and
+moves the `published` tag to that commit.

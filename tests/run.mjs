@@ -349,8 +349,8 @@ try {
     await page.goto(STORE + "/?lang=pt#updates");
     await page.waitFor(`document.getElementById("updates-empty").hidden === false`);
     assert.equal(await page.eval(`!!document.querySelector('[data-key="store:casamod-store"]')`), false);
-    const r = await fetch(GH + "/__run", { method: "POST", body: JSON.stringify({
-      repo: "UsuarioDeJava/CasaMOD-Store", workflow: "docker-publish.yml", branch: "main", sha: "2222222222222222222222222222222222222222" }) });
+    const r = await fetch(GH + "/__tag", { method: "POST", body: JSON.stringify({
+      repo: "UsuarioDeJava/CasaMOD-Store", tag: "published", sha: "2222222222222222222222222222222222222222" }) });
     assert.ok(r.ok);
     await page.click("#btn-check");
     await page.waitFor(`!!document.querySelector('[data-key="store:casamod-store"]')`, { message: "self row" });

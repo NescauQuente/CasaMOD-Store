@@ -189,8 +189,8 @@ para o lugar certo.
 - Um item tem atualização quando um commit mais novo mexeu **na pasta dele**;
   commits em outras partes do repositório não contam.
 - A imagem da loja registra o commit de onde foi gerada; cada verificação
-  compara com a última execução bem-sucedida do `docker-publish.yml` na
-  `main`.
+  compara com o commit da tag `published`, que o CI move para cada commit
+  que publica.
 - O estado fica em `/DATA/AppData/casamod-store`: `config.json`
   (configurações e o token opcional) e `installed.json` (origem, commit e
   política de atualização de cada item).
@@ -365,6 +365,7 @@ build usado pela verificação de versão da loja.
   aviso.
 - `Apps/casamod-store/`: o app do CasaOS (formato de fonte de apps).
 
-A imagem é publicada em `ghcr.io/usuariodejava/casamod-store` pelo
-`.github/workflows/docker-publish.yml` a cada push na `main` que muda o
-programa e em tags `v*`.
+O `.github/workflows/ci.yml` roda os testes a cada push e pull request.
+Depois que eles passam, em pushes na `main` que mudam o programa e em tags
+`v*`, ele publica a imagem em `ghcr.io/usuariodejava/casamod-store` e move a
+tag `published` para esse commit.

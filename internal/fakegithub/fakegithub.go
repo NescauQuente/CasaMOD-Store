@@ -41,21 +41,20 @@ type Server struct {
 	Repos    map[string]*Repo
 	Token    string // token accepted for private repositories
 	Requests []string
-	// Runs holds successful workflow runs per "repo|workflow|branch", oldest first.
-	Runs map[string][]string
+	// Tags maps "repo|tag" to a commit.
+	Tags map[string]string
 	// RateLimited makes every API call fail with 403 + X-RateLimit-Remaining: 0.
 	RateLimited bool
 }
 
 // New returns an empty server.
-func New() *Server { return &Server{Repos: map[string]*Repo{}, Runs: map[string][]string{}} }
+func New() *Server { return &Server{Repos: map[string]*Repo{}, Tags: map[string]string{}} }
 
-// AddRun records a successful workflow run for a commit.
-func (s *Server) AddRun(repo, workflow, branch, sha string) {
+// SetTag points a lightweight tag at a commit.
+func (s *Server) SetTag(repo, tag, sha string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	k := repo + "|" + workflow + "|" + branch
-	s.Runs[k] = append(s.Runs[k], sha)
+	s.Tags[repo+"|"+tag] = sha
 }
 
 // Push adds a commit to a branch: files replace (or with "" delete) paths.
@@ -158,14 +157,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		writeJSON(w, map[string]string{"sha": s.Push(body.Repo, body.Branch, body.Message, body.Files)})
 		return
 	}
-	if req.URL.Path == "/__run" && req.Method == http.MethodPost {
-		// Test control endpoint: {"repo","workflow","branch","sha"}.
-		var body struct{ Repo, Workflow, Branch, SHA string }
+	if req.URL.Path == "/__tag" && req.Method == http.MethodPost {
+		// Test control endpoint: {"repo","tag","sha"}.
+		var body struct{ Repo, Tag, SHA string }
 		if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		s.AddRun(body.Repo, body.Workflow, body.Branch, body.SHA)
+		s.SetTag(body.Repo, body.Tag, body.SHA)
 		writeJSON(w, map[string]bool{"ok": true})
 		return
 	}
@@ -260,13 +259,13 @@ func (s *Server) api(w http.ResponseWriter, req *http.Request, p string) {
 			}
 		}
 		writeJSON(w, out)
-	case rest[0] == "actions" && len(rest) == 4 && rest[1] == "workflows" && rest[3] == "runs":
-		runs := s.Runs[repo+"|"+rest[2]+"|"+req.URL.Query().Get("branch")]
-		out := []any{}
-		if len(runs) > 0 {
-			out = append(out, map[string]any{"head_sha": runs[len(runs)-1], "updated_at": "2026-02-01T00:00:00Z", "display_title": "publish"})
+	case rest[0] == "git" && len(rest) == 4 && rest[1] == "ref" && rest[2] == "tags":
+		sha, ok := s.Tags[repo+"|"+rest[3]]
+		if !ok {
+			http.Error(w, `{"message":"Not Found"}`, http.StatusNotFound)
+			return
 		}
-		writeJSON(w, map[string]any{"total_count": len(out), "workflow_runs": out})
+		writeJSON(w, map[string]any{"ref": "refs/tags/" + rest[3], "object": map[string]string{"sha": sha, "type": "commit"}})
 	case rest[0] == "tarball" && len(rest) == 2:
 		_, c := s.find(repo, rest[1])
 		if c == nil {

@@ -62,7 +62,7 @@ func main() {
 	// The store itself: its "running" image is built from selfCommit (the
 	// browser tests start the store with CASAMOD_STORE_COMMIT set to it).
 	gh.Push("UsuarioDeJava/CasaMOD-Store", "main", "store", map[string]string{"go.mod": "module x"})
-	gh.AddRun("UsuarioDeJava/CasaMOD-Store", "docker-publish.yml", "main", selfCommit)
+	gh.SetTag("UsuarioDeJava/CasaMOD-Store", "published", selfCommit)
 
 	l, err := net.Listen("tcp", *addr)
 	if err != nil {

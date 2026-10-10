@@ -479,14 +479,14 @@ func TestSelfUpdate(t *testing.T) {
 
 	e.app.Commit = "aaa"
 	e.gh.Push(SelfRepo, "main", "init", map[string]string{"go.mod": "x"})
-	e.gh.AddRun(SelfRepo, SelfWorkflow, SelfBranch, "aaa")
+	e.gh.SetTag(SelfRepo, SelfTag, "aaa")
 	e.app.Check(ctx)
 	if v := e.app.selfViewLocked(); v.HasUpdate || v.LatestSHA != "aaa" {
 		t.Fatalf("running the newest image: %+v", v)
 	}
-	// Runs on other branches do not count.
-	e.gh.AddRun(SelfRepo, SelfWorkflow, "dev", "ccc")
-	e.gh.AddRun(SelfRepo, SelfWorkflow, SelfBranch, "bbb")
+	// Other tags do not count.
+	e.gh.SetTag(SelfRepo, "v9", "ccc")
+	e.gh.SetTag(SelfRepo, SelfTag, "bbb")
 	e.app.Check(ctx)
 	if v := e.app.selfViewLocked(); !v.HasUpdate || v.LatestSHA != "bbb" {
 		t.Fatalf("new image not detected: %+v", v)

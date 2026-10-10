@@ -23,8 +23,9 @@ wallpapers from GitHub, with a web UI and a notifier mini-mod. See README.md.
 - `internal/notifier/files`: the mini-mod; its texts cover the 31 CasaOS
   languages (`src/assets/lang` of CasaOS-UI, lowercase keys like `pt_br`).
 - `internal/app/self.go`: "new version of the store" check (build commit via
-  `-X main.commit`, compared with the last successful `docker-publish.yml`
-  run on `main`; work goes straight to `main`).
+  `-X main.commit`, compared with the `published` tag that
+  `.github/workflows/ci.yml` moves to every commit it publishes; work goes
+  straight to `main`).
 - `Apps/casamod-store/docker-compose.yml`: the app, served as a CasaOS app
   store source (repo zip). CasaOS' "Check then update" compares the `latest`
   digest only for apps found in a source.

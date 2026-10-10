@@ -9,12 +9,11 @@ import (
 	"github.com/usuariodejava/casamod-store/internal/store"
 )
 
-// The store's own image is published by this workflow on every push to main,
-// so the newest successful run tells which commit the "latest" image holds.
+// The CI moves the SelfTag tag to every commit it publishes as the "latest"
+// image, so the tag tells which commit the newest image was built from.
 const (
-	SelfRepo     = "UsuarioDeJava/CasaMOD-Store"
-	SelfWorkflow = "docker-publish.yml"
-	SelfBranch   = "main"
+	SelfRepo = "UsuarioDeJava/CasaMOD-Store"
+	SelfTag  = "published"
 
 	// SelfKey is the policy key of the store itself.
 	SelfKey = "store:casamod-store"
@@ -62,7 +61,7 @@ func (a *App) checkSelf(ctx context.Context) {
 	if a.Commit == "" {
 		return
 	}
-	run, err := a.GH.LatestSuccessfulRun(ctx, SelfRepo, SelfWorkflow, SelfBranch)
+	run, err := a.GH.TagCommit(ctx, SelfRepo, SelfTag)
 	a.State.Lock()
 	a.State.Self.CheckedAt = time.Now().UTC()
 	if err != nil {

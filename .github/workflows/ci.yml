@@ -1,0 +1,129 @@
+name: CI
+
+permissions:
+  contents: write # moves the "published" tag
+  packages: write
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vet and format
+        run: |
+          go vet ./...
+          test -z "$(gofmt -l .)"
+
+      - name: Go tests
+        run: go test -race ./...
+
+      - name: Browser tests
+        run: CHROME_BIN="$(which google-chrome)" node tests/run.mjs
+
+  # Publishes the image after the tests pass, on main and v* tags, when the
+  # program changed. The "published" tag marks the commit of the newest image:
+  # the store reads it to know when a new version exists.
+  publish:
+    needs: test
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Did the program change?
+        id: changes
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          publish=true
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF_TYPE" = branch ] \
+             && [ -n "$BEFORE" ] && [ "$BEFORE" != 0000000000000000000000000000000000000000 ] \
+             && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            if ! git diff --name-only "$BEFORE" "$GITHUB_SHA" \
+                 | grep -qE '^(cmd|internal|web)/|^go\.mod$|^Dockerfile$|^\.github/workflows/ci\.yml$'; then
+              publish=false
+            fi
+          fi
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish"
+
+      - name: Image name (lowercase) and version
+        if: steps.changes.outputs.publish == 'true'
+        run: |
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            echo "VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          else
+            echo "VERSION=main-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Extract metadata (tags, labels) for Docker
+        if: steps.changes.outputs.publish == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+
+      - name: Set up QEMU
+        if: steps.changes.outputs.publish == 'true'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: steps.changes.outputs.publish == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        if: steps.changes.outputs.publish == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: steps.changes.outputs.publish == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: |
+            linux/amd64
+            linux/arm/v7
+            linux/arm64
+          build-args: |
+            VERSION=${{ env.VERSION }}
+            COMMIT=${{ github.sha }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Mark the published commit
+        if: steps.changes.outputs.publish == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          git tag -f published "$GITHUB_SHA"
+          git push -f origin refs/tags/published

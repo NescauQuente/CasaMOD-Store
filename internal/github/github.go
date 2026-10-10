@@ -281,28 +281,32 @@ func (c *Client) Fetch(ctx context.Context, rawURL string, limit int64) ([]byte,
 	return readLimited(resp.Body, limit)
 }
 
-// LatestSuccessfulRun returns the commit of the most recent successful run of
-// a workflow on a branch (used to know which image was published last).
-func (c *Client) LatestSuccessfulRun(ctx context.Context, repo, workflow, branch string) (Commit, error) {
-	q := url.Values{}
-	q.Set("branch", branch)
-	q.Set("status", "success")
-	q.Set("per_page", "1")
-	var out struct {
-		Runs []struct {
-			HeadSHA   string    `json:"head_sha"`
-			UpdatedAt time.Time `json:"updated_at"`
-			Title     string    `json:"display_title"`
-		} `json:"workflow_runs"`
+// TagCommit returns the commit a tag points to (lightweight or annotated).
+func (c *Client) TagCommit(ctx context.Context, repo, tag string) (Commit, error) {
+	var ref struct {
+		Object struct {
+			SHA  string `json:"sha"`
+			Type string `json:"type"`
+		} `json:"object"`
 	}
-	if err := c.getJSON(ctx, c.APIBase+"/repos/"+repo+"/actions/workflows/"+url.PathEscape(workflow)+"/runs?"+q.Encode(), &out); err != nil {
+	if err := c.getJSON(ctx, c.APIBase+"/repos/"+repo+"/git/ref/tags/"+url.PathEscape(tag), &ref); err != nil {
 		return Commit{}, err
 	}
-	if len(out.Runs) == 0 {
+	if ref.Object.Type == "tag" {
+		var annotated struct {
+			Object struct {
+				SHA string `json:"sha"`
+			} `json:"object"`
+		}
+		if err := c.getJSON(ctx, c.APIBase+"/repos/"+repo+"/git/tags/"+ref.Object.SHA, &annotated); err != nil {
+			return Commit{}, err
+		}
+		ref.Object.SHA = annotated.Object.SHA
+	}
+	if ref.Object.SHA == "" {
 		return Commit{}, ErrNotFound
 	}
-	r := out.Runs[0]
-	return Commit{SHA: r.HeadSHA, Date: r.UpdatedAt, Message: r.Title}, nil
+	return Commit{SHA: ref.Object.SHA}, nil
 }
 
 // TreeEntry is one entry of a recursive git tree listing.
