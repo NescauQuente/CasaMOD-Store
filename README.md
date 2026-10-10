@@ -14,9 +14,9 @@ that opens from the app icon in CasaOS.
 - **Updates of the store itself**: the image records the commit it was built
   from; each check compares it with the last successful
   `docker-publish.yml` run on `main` and, when a newer image exists, shows it
-  in the UI and in the desktop notice. CasaOS' *Check then update* only
-  works for apps from an app store, so for a custom install update with:
-  `docker compose -f /var/lib/casaos/apps/casamod-store/docker-compose.yml up -d --pull always`
+  in the UI and in the desktop notice. Update it with CasaOS' *Check then
+  update*, which works once this repository is added as an app store source
+  (see below).
 - Small: one static Go binary (no dependencies), multi-arch image
   (amd64, arm/v7, arm64).
 
@@ -45,11 +45,19 @@ that opens from the app icon in CasaOS.
 
 ## Install on CasaOS
 
+This repository is also a CasaOS app store source (`Apps/casamod-store/`).
+
 1. Install CasaMOD first.
-2. In CasaOS: **App Store → Custom Install → Import** (the icon at the top
-   right), paste the content of [`docker-compose.yml`](docker-compose.yml) and
-   install.
-3. Open the app from its icon (port `8418`).
+2. In CasaOS: **App Store → More apps**, add
+   `https://github.com/NescauQuente/CasaMOD-Store/archive/refs/heads/main.zip`.
+3. Install **CasaMOD Store** from the App Store and open it from its icon
+   (port `8418`).
+
+CasaOS only offers *Check then update* for apps it finds in a source, so
+installing from the source is what makes updates work. A custom install of
+[`Apps/casamod-store/docker-compose.yml`](Apps/casamod-store/docker-compose.yml)
+uses the same `store_app_id` and is picked up as well once the source is
+added.
 
 ### About the Docker socket
 
