@@ -30,7 +30,9 @@ wallpapers from GitHub, with a web UI and a notifier mini-mod. See README.md.
   digest only for apps found in a source.
 - `internal/store/discover.go`: sources without store.json are scanned
   (default sources: UsuarioDeJava/CasaMODs and UsuarioDeJava/WE-Wallpapers).
-- `web/static`: plain HTML/CSS/JS, embedded; texts in `en` and `pt`.
+- `web/static`: plain HTML/CSS/JS, embedded. Texts live in
+  `web/static/lang/<code>.json`, the 31 CasaOS languages; a new or changed
+  text goes into every file (`web/i18n_test.go` fails otherwise).
 
 ## Tests
 - `go test -race ./...` (fake GitHub in `internal/fakegithub`, fake Docker socket).

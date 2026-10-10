@@ -3,110 +3,63 @@
   "use strict";
 
   // ---------------------------------------------------------------- i18n
-  var STRINGS = {
-    en: {
-      "credits.by": "by", "lw.text": "Wallpapers need the Live Wallpapers mod, which is not installed.", "lw.install": "Install now", "tab.store": "Store", "tab.installed": "Installed", "tab.updates": "Updates", "tab.settings": "Settings",
-      "store.search": "Search mods and wallpapers", "store.refresh": "Refresh", "store.addUrl": "Add from GitHub URL",
-      "store.empty": "Nothing found.", "store.clearSelection": "Clear", "store.installSelected": "Install selected",
-      "store.selected": "{n} selected", "store.sourceError": "Could not load {source}: {error}",
-      "warn.mixed": "{source}: {path} has both mod and wallpaper files (read as {type})",
-      "warn.ignored": "{source}: {path} is a {type}, so {inner} inside it is ignored",
-      "warn.empty": "{source}: no mods or wallpapers found",
-      "warn.same_id": "{source}: {inner} have the same name \"{path}\" and would install into the same folder",
-      "filter.all": "All", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "All sources",
-      "type.mod": "Mod", "type.wallpaper": "Wallpaper",
-      "state.installed": "Installed", "state.update": "Update available", "state.manual": "Manual",
-      "state.missing": "Folder missing", "state.upToDate": "Up to date", "state.error": "Check failed",
-      "common.install": "Install", "common.update": "Update", "common.remove": "Remove", "common.cancel": "Cancel",
-      "common.reinstall": "Reinstall", "common.replace": "Replace",
-      "installed.title": "Managed", "installed.empty": "Nothing installed.",
-      "manual.title": "Manual",
-      "manual.empty": "None.",
-      "policy.notify": "Notify me", "policy.auto": "Update automatically",
-      "updates.check": "Check now", "updates.updateAll": "Update all", "updates.empty": "Everything is up to date.",
-      "updates.last": "Last check: {when}", "updates.never": "Not checked yet", "updates.next": "next: {when}",
-      "updates.off": "automatic checks are off",
-      "log.title": "Activity",
-      "settings.github": "GitHub", "settings.tokenSaved": "Token saved", "settings.token": "Token", "settings.clearToken": "Remove token",
-      "settings.catalogs": "Sources",
-      "settings.casamodMods": "CasaMOD mods",
-      "settings.updates": "Updates", "settings.interval": "Check every (hours)",
-      "settings.notifier": "Notice on CasaOS",
-      "settings.publicUrl": "Store address",
-      "settings.port": "Store port",
-      "settings.container": "Container",
-      "settings.restartNow": "Restart CasaMOD", "settings.save": "Save", "settings.saved": "Saved.",
-      "url.title": "Add from GitHub", "url.url": "URL", "url.read": "Read",
-      "url.repo": "Repository", "url.branch": "Branch", "url.path": "Folder",
-      "url.id": "ID", "url.type": "Type", "url.policy": "Updates",
-      "banner.pending": "Restarting CasaMOD…",
-      "banner.needed": "CasaMOD restart failed: {error}",
-      "self.name": "CasaMOD Store",
-      "banner.noDocker": "Docker socket not mounted: restart CasaMOD manually.",
-      "banner.restart": "Restart now", "banner.restarted": "CasaMOD restarted.",
-      "confirm.remove": "Remove {name}?", "done.installed": "Installed {name}.", "done.updated": "Updated {name}.",
-      "done.removed": "Removed {name}.", "done.checked": "Check finished.", "done.nothing": "Nothing to update.",
-      "err.network": "The store did not answer.",
-    },
-    pt: {
-      "credits.by": "por", "lw.text": "Os wallpapers precisam do mod Live Wallpapers, que não está instalado.", "lw.install": "Instalar agora", "tab.store": "Loja", "tab.installed": "Instalados", "tab.updates": "Atualizações", "tab.settings": "Configurações",
-      "store.search": "Buscar mods e wallpapers", "store.refresh": "Recarregar", "store.addUrl": "Adicionar por URL do GitHub",
-      "store.empty": "Nada encontrado.", "store.clearSelection": "Limpar", "store.installSelected": "Instalar selecionados",
-      "store.selected": "{n} selecionado(s)", "store.sourceError": "Não foi possível carregar {source}: {error}",
-      "warn.mixed": "{source}: {path} tem arquivos de mod e de wallpaper (lido como {type})",
-      "warn.ignored": "{source}: {path} é um {type}, então {inner} dentro dele é ignorado",
-      "warn.empty": "{source}: nenhum mod ou wallpaper encontrado",
-      "warn.same_id": "{source}: {inner} têm o mesmo nome \"{path}\" e seriam instalados na mesma pasta",
-      "filter.all": "Todos", "filter.mods": "Mods", "filter.wallpapers": "Wallpapers", "filter.allSources": "Todas as origens",
-      "type.mod": "Mod", "type.wallpaper": "Wallpaper",
-      "state.installed": "Instalado", "state.update": "Atualização disponível", "state.manual": "Manual",
-      "state.missing": "Pasta ausente", "state.upToDate": "Atualizado", "state.error": "Falha na verificação",
-      "common.install": "Instalar", "common.update": "Atualizar", "common.remove": "Remover", "common.cancel": "Cancelar",
-      "common.reinstall": "Reinstalar", "common.replace": "Substituir",
-      "installed.title": "Gerenciados", "installed.empty": "Nada instalado.",
-      "manual.title": "Manuais",
-      "manual.empty": "Nenhum.",
-      "policy.notify": "Só avisar", "policy.auto": "Atualizar sozinho",
-      "updates.check": "Verificar agora", "updates.updateAll": "Atualizar tudo", "updates.empty": "Tudo atualizado.",
-      "updates.last": "Última verificação: {when}", "updates.never": "Ainda não verificado", "updates.next": "próxima: {when}",
-      "updates.off": "verificação automática desligada",
-      "log.title": "Atividade",
-      "settings.github": "GitHub", "settings.tokenSaved": "Token salvo", "settings.token": "Token", "settings.clearToken": "Remover token",
-      "settings.catalogs": "Fontes",
-      "settings.casamodMods": "Mods do CasaMOD",
-      "settings.updates": "Atualizações", "settings.interval": "Verificar a cada (horas)",
-      "settings.notifier": "Aviso no CasaOS",
-      "settings.publicUrl": "Endereço da loja",
-      "settings.port": "Porta da loja",
-      "settings.container": "Container",
-      "settings.restartNow": "Reiniciar CasaMOD", "settings.save": "Salvar", "settings.saved": "Salvo.",
-      "url.title": "Adicionar do GitHub", "url.url": "URL", "url.read": "Ler",
-      "url.repo": "Repositório", "url.branch": "Branch", "url.path": "Pasta",
-      "url.id": "ID", "url.type": "Tipo", "url.policy": "Atualizações",
-      "banner.pending": "Reiniciando o CasaMOD…",
-      "banner.needed": "Falha ao reiniciar o CasaMOD: {error}",
-      "self.name": "CasaMOD Store",
-      "banner.noDocker": "Socket do Docker não montado: reinicie o CasaMOD manualmente.",
-      "banner.restart": "Reiniciar agora", "banner.restarted": "CasaMOD reiniciado.",
-      "confirm.remove": "Remover {name}?", "done.installed": "{name} instalado.", "done.updated": "{name} atualizado.",
-      "done.removed": "{name} removido.", "done.checked": "Verificação concluída.", "done.nothing": "Nada para atualizar.",
-      "err.network": "A loja não respondeu.",
+  // The 31 CasaOS languages, one JSON file each in lang/. English is always
+  // loaded too, as the fallback for any missing text.
+  var LANGS = ["ar_sa", "be_by", "bg_bg", "ca_es", "cs_cz", "de_de", "el_gr", "en_us", "es_es", "fr_fr",
+    "hr_hr", "hu_hu", "id_id", "it_it", "ja_jp", "ko_kr", "nl_nl", "no_no", "pl_pl", "pt_br", "pt_pt",
+    "ro_ro", "ru_ru", "sk_sk", "sl_si", "sv_se", "tr_tr", "uk_ua", "vi_vn", "zh_cn", "zh_tw"];
+  var STRINGS = { en_us: {} };
+  var LANG = "en_us";
+
+  // pickLang maps a browser language ("pt-BR", "zh-Hant-TW", "nb") to a file.
+  function pickLang(tag) {
+    var t = String(tag || "").toLowerCase().replace(/-/g, "_");
+    var alias = { en: "en_us", pt: "pt_br", nb: "no_no", nn: "no_no", no: "no_no", zh_hant: "zh_tw", zh_hk: "zh_tw", zh_mo: "zh_tw" };
+    if (LANGS.indexOf(t) >= 0) return t;
+    if (alias[t]) return alias[t];
+    if (/^zh_(hant|tw|hk|mo)/.test(t)) return "zh_tw";
+    var base = t.split("_")[0];
+    if (alias[base]) return alias[base];
+    for (var i = 0; i < LANGS.length; i++) if (LANGS[i].split("_")[0] === base) return LANGS[i];
+    return "";
+  }
+
+  function chooseLang() {
+    try {
+      var forced = pickLang(new URLSearchParams(location.search).get("lang"));
+      if (forced) return forced;
+    } catch (e) {}
+    var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+    for (var i = 0; i < list.length; i++) {
+      var l = pickLang(list[i]);
+      if (l) return l;
     }
-  };
-  var LANG = (navigator.language || "en").toLowerCase().indexOf("pt") === 0 ? "pt" : "en";
-  try {
-    var forced = new URLSearchParams(location.search).get("lang");
-    if (forced && STRINGS[forced]) LANG = forced;
-  } catch (e) {}
+    return "en_us";
+  }
+
+  function loadLangFile(code) {
+    return fetch("lang/" + code + ".json").then(function (r) { return r.ok ? r.json() : {}; }, function () { return {}; });
+  }
+
+  function loadLang() {
+    LANG = chooseLang();
+    var wanted = LANG === "en_us" ? ["en_us"] : ["en_us", LANG];
+    return Promise.all(wanted.map(loadLangFile)).then(function (files) {
+      wanted.forEach(function (code, i) { STRINGS[code] = files[i]; });
+    });
+  }
+
+  function locale() { return LANG.replace("_", "-"); }
 
   function t(key, vars) {
-    var s = (STRINGS[LANG] && STRINGS[LANG][key]) || STRINGS.en[key] || key;
+    var s = (STRINGS[LANG] && STRINGS[LANG][key]) || STRINGS.en_us[key] || key;
     if (vars) Object.keys(vars).forEach(function (k) { s = s.split("{" + k + "}").join(vars[k]); });
     return s;
   }
 
   function applyI18n() {
-    document.documentElement.lang = LANG === "pt" ? "pt-BR" : "en";
+    document.documentElement.lang = locale();
+    document.documentElement.dir = LANG === "ar_sa" ? "rtl" : "ltr";
     document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) { el.placeholder = t(el.dataset.i18nPlaceholder); });
   }
@@ -156,7 +109,7 @@
     if (!s) return "";
     var d = new Date(s);
     if (isNaN(d) || d.getFullYear() < 2000) return "";
-    return d.toLocaleString(LANG === "pt" ? "pt-BR" : undefined, { dateStyle: "short", timeStyle: "short" });
+    return d.toLocaleString(locale(), { dateStyle: "short", timeStyle: "short" });
   }
 
   function short(sha) { return (sha || "").slice(0, 7); }
@@ -454,7 +407,7 @@
     if (self) {
       list.appendChild(el("div", { class: "row-item", dataset: { key: "store:casamod-store" } }, [
         el("div", { class: "info" }, [
-          el("div", { class: "name" }, [t("self.name"), el("span", { class: "badge accent", text: t("state.update") })]),
+          el("div", { class: "name" }, ["CasaMOD Store", el("span", { class: "badge accent", text: t("state.update") })]),
           el("div", { class: "sub", text: short(self.commit) + " → " + short(self.latest_sha) })
         ]),
         el("div")
@@ -671,7 +624,9 @@
     });
   }
 
-  applyI18n();
-  wire();
-  loadState().then(showTab, function (e) { toast(e.message, true); showTab(); });
+  loadLang().then(function () {
+    applyI18n();
+    wire();
+    loadState().then(showTab, function (e) { toast(e.message, true); showTab(); });
+  });
 })();

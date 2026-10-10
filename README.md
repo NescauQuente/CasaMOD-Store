@@ -17,6 +17,7 @@ that opens from the app icon in CasaOS.
   to the store. Texts in the 31 CasaOS languages.
 - **Updates of the store itself**: shown in the store and in the desktop
   notice, applied with CasaOS' *Check then update*.
+- Web UI in the 31 CasaOS languages.
 - Small: one static Go binary (no dependencies), multi-arch image
   (amd64, arm/v7, arm64), a few MB of RAM.
 
@@ -94,6 +95,10 @@ stored only in `/DATA/AppData/casamod-store/config.json` (mode 0600) and is
 never sent back to the browser.
 
 ## Using the store
+
+The web UI is available in the 31 CasaOS languages and follows the browser's
+language (English when it is not one of them); add `?lang=de`,
+`?lang=pt-BR`, … to the address to pick one.
 
 **Store**
 
@@ -327,7 +332,9 @@ commit used by the self-update check.
 - `internal/docker`: restarts CasaMOD over the Docker socket.
 - `internal/notifier`: the embedded `casamod-store-notifier` mini-mod.
 - `internal/fakegithub`: in-memory GitHub used by the tests.
-- `web/static`: the web UI (plain HTML/CSS/JS, embedded in the binary).
+- `web/static`: the web UI (plain HTML/CSS/JS, embedded in the binary);
+  texts in `web/static/lang/<code>.json`, one file per CasaOS language
+  (`go test ./web/` checks that every file has every text).
 - `tests/`: browser tests: a dependency-free Chrome DevTools harness, a fake
   GitHub server and a mock CasaOS page that loads the notifier.
 - `Apps/casamod-store/`: the CasaOS app (app store source layout).

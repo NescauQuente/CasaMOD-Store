@@ -18,6 +18,7 @@ uma interface web que abre pelo ícone do app no CasaOS.
   para a loja. Textos nos 31 idiomas do CasaOS.
 - **Atualizações da própria loja**: aparecem na loja e no aviso do desktop, e
   são aplicadas pelo *Verificar e atualizar* do CasaOS.
+- Interface web nos 31 idiomas do CasaOS.
 - Leve: um binário Go estático (sem dependências), imagem multi-arquitetura
   (amd64, arm/v7, arm64), poucos MB de RAM.
 
@@ -99,6 +100,10 @@ guardado só em `/DATA/AppData/casamod-store/config.json` (modo 0600) e nunca é
 enviado de volta ao navegador.
 
 ## Usando a loja
+
+A interface web está nos 31 idiomas do CasaOS e segue o idioma do navegador
+(inglês quando não é um deles); acrescente `?lang=de`, `?lang=pt-BR`, … ao
+endereço para escolher um.
 
 **Loja**
 
@@ -335,7 +340,9 @@ build usado pela verificação de versão da loja.
 - `internal/docker`: reinicia o CasaMOD pelo socket do Docker.
 - `internal/notifier`: o mini-mod `casamod-store-notifier` embutido.
 - `internal/fakegithub`: GitHub em memória usado nos testes.
-- `web/static`: a interface web (HTML/CSS/JS puros, embutidos no binário).
+- `web/static`: a interface web (HTML/CSS/JS puros, embutidos no binário);
+  textos em `web/static/lang/<código>.json`, um arquivo por idioma do CasaOS
+  (`go test ./web/` confere se todo arquivo tem todos os textos).
 - `tests/`: testes de navegador: um harness do Chrome DevTools sem
   dependências, um GitHub falso e uma página que imita o CasaOS e carrega o
   aviso.

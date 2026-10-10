@@ -473,6 +473,38 @@ try {
     await page.viewport(1280, 900);
   });
 
+  await test("all 31 languages load; browser language is detected", async () => {
+    const cases = [["de", "Einstellungen"], ["ja-JP", "設定"], ["zh-TW", "設定"], ["zh", "设置"], ["pt-PT", "Definições"],
+      ["pt", "Configurações"], ["nb", "Innstillinger"], ["ar", "الإعدادات"], ["xx", "Settings"]];
+    for (const [lang, settings] of cases) {
+      await page.goto(STORE + "/?lang=" + lang + "#settings");
+      await page.waitFor(`document.querySelector('[data-tab="settings"]').textContent === ${JSON.stringify(settings)}`, { message: lang });
+    }
+    assert.equal(await page.eval(`document.documentElement.dir`), "ltr");
+    await page.goto(STORE + "/?lang=ar#store");
+    await page.waitFor(`document.documentElement.dir === "rtl" && document.documentElement.lang === "ar-sa"`);
+    await shot("09-arabic");
+    // Without ?lang the browser's languages decide.
+    const { userAgent } = await browser.send("Browser.getVersion");
+    await page.send("Emulation.setUserAgentOverride", { userAgent, acceptLanguage: "fr-FR,fr" });
+    await page.goto(STORE + "/#store");
+    await page.waitFor(`document.querySelector('[data-tab="updates"]').textContent.trim().startsWith("Mises à jour")`, { message: "fr from browser" });
+    await page.send("Emulation.setUserAgentOverride", { userAgent, acceptLanguage: "en-US,en" });
+  });
+
+  await test("long translations fit on a phone", async () => {
+    await page.viewport(390, 844, true);
+    for (const lang of ["de", "ru", "el", "fi" /* falls back to English */, "vi", "hu"]) {
+      for (const tab of ["store", "installed", "updates", "settings"]) {
+        await page.goto(STORE + "/?lang=" + lang + "#" + tab);
+        await page.waitFor(`!document.getElementById("tab-${tab}").hidden`);
+        const over = await page.eval(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
+        assert.ok(over <= 0, `${lang}/${tab}: page is ${over}px wider than the screen`);
+      }
+    }
+    await page.viewport(1280, 900);
+  });
+
   await test("no JavaScript errors", async () => {
     assert.deepEqual(page.errors, []);
     assert.deepEqual(casa.errors, []);
