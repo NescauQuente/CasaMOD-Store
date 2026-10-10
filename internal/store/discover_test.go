@@ -27,11 +27,20 @@ func TestDiscover(t *testing.T) {
 		"proj-b/widget/mod.css":              "x",
 		".github/x/mod.js":                   "ignored",
 	})
+	// Layout of NescauQuente/WE-Wallpapers: the installable folder is
+	// <name>/wallpaper-engine/, star-wallpaper also has a stray mod.js.
 	gh.Push("me/walls", "main", "init", map[string]string{
-		"star-wallpaper/index.html":      "<html>",
-		"star-wallpaper/project.json":    `{"title":"Starry Orbit","preview":"preview.jpg"}`,
-		"plexus-wallpaper/index.html":    "<html>",
-		"plexus-wallpaper/js/index.html": "nested page",
+		"README.md":             "x",
+		"star-wallpaper/mod.js": "old starfield mod",
+		"star-wallpaper/deprecated/starry-orbit/x.js":       "x",
+		"star-wallpaper/tests/wallpaper-engine/tests.html":  "x",
+		"star-wallpaper/wallpaper-engine/index.html":        "<html>",
+		"star-wallpaper/wallpaper-engine/project.json":      `{"title":"Starry Orbit","type":"web","preview":"preview.jpg"}`,
+		"plexus-wallpaper/wallpaper-engine/index.html":      "<html>",
+		"plexus-wallpaper/wallpaper-engine/project.json":    `{"title":"Neural Plexus","type":"web"}`,
+		"plexus-wallpaper/wallpaper-engine/js/x/index.html": "nested page",
+		"scene/project.json":                                `{"title":"A Scene","type":"scene"}`,
+		"simple/index.html":                                 "<html>",
 	})
 
 	_, items, err := LoadCatalog(context.Background(), c, "me/mods")
@@ -55,14 +64,15 @@ func TestDiscover(t *testing.T) {
 	for _, it := range items {
 		got[it.Type+":"+it.ID] = it
 	}
-	star := got["wallpaper:star-wallpaper"]
-	if len(items) != 2 || star.Name != "Starry Orbit" || got["wallpaper:plexus-wallpaper"].Source.Path != "plexus-wallpaper" ||
-		star.Preview != "https://raw.githubusercontent.com/me/walls/HEAD/star-wallpaper/preview.jpg" {
+	star, plexus := got["wallpaper:starry-orbit"], got["wallpaper:neural-plexus"]
+	if len(items) != 3 || star.Name != "Starry Orbit" || star.Source.Path != "star-wallpaper/wallpaper-engine" ||
+		plexus.Source.Path != "plexus-wallpaper/wallpaper-engine" || got["wallpaper:simple"].Source.Path != "simple" ||
+		star.Preview != "https://raw.githubusercontent.com/me/walls/HEAD/star-wallpaper/wallpaper-engine/preview.jpg" {
 		t.Fatalf("wallpapers: %+v", items)
 	}
 
 	// A store.json, when present, still wins over discovery.
-	gh.Push("me/walls", "main", "catalog", map[string]string{"store.json": `{"items":[{"id":"only","type":"wallpaper","path":"star-wallpaper"}]}`})
+	gh.Push("me/walls", "main", "catalog", map[string]string{"store.json": `{"items":[{"id":"only","type":"wallpaper","path":"simple"}]}`})
 	if _, items, _ := LoadCatalog(context.Background(), c, "me/walls"); len(items) != 1 || items[0].ID != "only" {
 		t.Fatalf("store.json ignored: %+v", items)
 	}

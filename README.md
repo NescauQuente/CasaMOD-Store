@@ -86,13 +86,16 @@ A source is a GitHub repository (or a folder of one) added in **Settings**.
 Without a `store.json`, the store reads the repository tree (one API call)
 and lists:
 
-- every folder with `mod.js` or `mod.css` at its root as a **mod**;
-- every folder with `project.json` (Wallpaper Engine) or `index.html` as a
-  **wallpaper**;
+- every folder with a Wallpaper Engine `project.json` of type `web` as a
+  **wallpaper**, named after its title (`wallpaper-engine/` with title
+  "Starry Orbit" installs as `wallpapers/starry-orbit`); nothing inside or
+  around a project counts as a separate item;
+- every other folder with `mod.js` or `mod.css` at its root as a **mod**;
+- every other folder with `index.html` as a **wallpaper**;
 
 taking only the outermost match and skipping hidden, `test(s)`, `docs`,
-`examples` and `node_modules` folders. The folder name is the id; name,
-description, version and preview come from `mod.json` / `project.json`.
+`examples` and `node_modules` folders. Mod ids are folder names; names,
+descriptions and previews come from `mod.json` / `project.json`.
 New folders appear in the store on their own, and installed items follow
 every commit to their folder.
 
