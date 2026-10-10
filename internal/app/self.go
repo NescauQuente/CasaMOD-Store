@@ -15,6 +15,11 @@ const (
 	SelfRepo     = "UsuarioDeJava/CasaMOD-Store"
 	SelfWorkflow = "docker-publish.yml"
 	SelfBranch   = "main"
+
+	// SelfKey is the policy key of the store itself.
+	SelfKey = "store:casamod-store"
+	// SelfAppID is the compose app id CasaOS knows the store by.
+	SelfAppID = "casamod-store"
 )
 
 // SelfView is the store's own version as shown by the UI.
@@ -25,6 +30,8 @@ type SelfView struct {
 	LatestDate time.Time `json:"latest_date,omitempty"`
 	HasUpdate  bool      `json:"has_update"`
 	LastError  string    `json:"last_error,omitempty"`
+	Policy     string    `json:"policy"`
+	Key        string    `json:"key"`
 }
 
 // selfHasUpdate reports whether a newer image than the running one was
@@ -39,7 +46,15 @@ func (a *App) selfViewLocked() SelfView {
 	return SelfView{
 		Version: a.Version, Commit: a.Commit, LatestSHA: s.LatestSHA, LatestDate: s.LatestDate,
 		HasUpdate: selfHasUpdate(a.Commit, s), LastError: s.LastError,
+		Policy: selfPolicy(a.State.Config), Key: SelfKey,
 	}
+}
+
+func selfPolicy(c store.Config) string {
+	if c.SelfPolicy == store.PolicyAuto {
+		return store.PolicyAuto
+	}
+	return store.PolicyNotify
 }
 
 // checkSelf looks for a newer image of the store. The caller holds a.op.

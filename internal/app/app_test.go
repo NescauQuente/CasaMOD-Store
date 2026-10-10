@@ -491,6 +491,19 @@ func TestSelfUpdate(t *testing.T) {
 	if items := statusItems(); len(items) != 1 || items[0].Type != "store" || items[0].Latest != "bbb" {
 		t.Fatalf("notifier status: %+v", items)
 	}
+	// "auto": the notice hides the store and tells the mod to update it.
+	if err := e.app.SetPolicy(SelfKey, store.PolicyAuto); err != nil {
+		t.Fatal(err)
+	}
+	var st notifier.Status
+	json.Unmarshal([]byte(readFile(t, filepath.Join(e.modDir, notifier.ID, notifier.StatusFile))), &st)
+	if len(st.Items) != 0 || st.SelfUpdate == nil || st.SelfUpdate.AppID != "casamod-store" || st.SelfUpdate.Latest != "bbb" {
+		t.Fatalf("auto status: %+v", st)
+	}
+	if v := e.app.selfViewLocked(); v.Policy != store.PolicyAuto || v.Key != SelfKey {
+		t.Fatalf("view: %+v", v)
+	}
+	e.app.SetPolicy(SelfKey, store.PolicyNotify)
 	// Survives a restart of the store.
 	re, err := store.Load(e.app.State.Dir())
 	if err != nil || re.Self.LatestSHA != "bbb" {

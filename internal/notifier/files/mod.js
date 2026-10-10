@@ -1,5 +1,5 @@
 /**
- * CasaMOD: casamod-store-notifier v1.0.0
+ * CasaMOD: casamod-store-notifier v1.1.0
  * Installed and managed by the CasaMOD Store container.
  * Reads status.json (written by the container next to this file) and shows a
  * small notice on the CasaOS desktop when updates are waiting.
@@ -10,6 +10,7 @@
   var BASE = "/mod/casamod-store-notifier/";
   var POLL_MS = 30 * 60 * 1000;
   var DISMISS_KEY = "casamod_store_notifier_dismissed";
+  var SELF_UPDATE_KEY = "casamod_store_self_update";
   var ROOT_ID = "casamod-store-notifier";
 
   // Texts in the 31 CasaOS languages: [updates available, open store, dismiss].
@@ -149,10 +150,38 @@
     document.body.appendChild(root);
   }
 
+  function token() {
+    try { return localStorage.getItem("access_token") || ""; } catch (e) { return ""; }
+  }
+
+  // The store's update policy is "auto": do what CasaOS' "Check then
+  // update" does, with this session, once per new image. force=true skips
+  // CasaOS' cached "up to date" answer.
+  function selfUpdate(status) {
+    var su = status.self_update;
+    if (!su || !su.app_id || !su.latest || !token()) return;
+    var done = "";
+    try { done = localStorage.getItem(SELF_UPDATE_KEY) || ""; } catch (e) {}
+    if (done === su.latest) return;
+    try { localStorage.setItem(SELF_UPDATE_KEY, su.latest); } catch (e) {}
+    fetch("/v2/app_management/compose/" + encodeURIComponent(su.app_id) + "?force=true", {
+      method: "PATCH",
+      headers: { Authorization: token() }
+    }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+    }).catch(function () {
+      try { localStorage.removeItem(SELF_UPDATE_KEY); } catch (e) {}
+    });
+  }
+
   function refresh() {
     fetch(BASE + "status.json?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (status) { if (status) render(status); else remove(); })
+      .then(function (status) {
+        if (!status) return remove();
+        render(status);
+        selfUpdate(status);
+      })
       .catch(function () {});
   }
 

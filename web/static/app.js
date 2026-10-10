@@ -410,7 +410,7 @@
           el("div", { class: "name" }, ["CasaMOD Store", el("span", { class: "badge accent", text: t("state.update") })]),
           el("div", { class: "sub", text: short(self.commit) + " → " + short(self.latest_sha) })
         ]),
-        el("div")
+        el("div", { class: "controls" }, [policySelect(self)])
       ]));
     }
     ups.forEach(function (it) { list.appendChild(installedRow(it, true)); });
@@ -439,6 +439,7 @@
     $("set-catalogs").value = (c.catalogs || []).join("\n");
     $("set-casamod-mods").checked = c.include_casamod_mods;
     $("set-interval").value = c.check_interval_hours;
+    if (state.self) $("set-self-policy").value = state.self.policy;
     $("set-notifier").checked = c.notifier;
     $("set-public-url").value = c.public_url || "";
     $("set-port").value = c.ui_port;
@@ -593,7 +594,13 @@
     });
     $("btn-update-all").addEventListener("click", function () { doUpdate([], ""); });
     $("btn-restart").addEventListener("click", restartNow);
-    $("settings-form").addEventListener("input", function () { settingsDirty = true; });
+    $("set-self-policy").addEventListener("change", function (e) {
+      e.stopPropagation();
+      api("POST", "policy", { key: "store:casamod-store", policy: e.target.value })
+        .then(function () { toast(t("settings.saved")); return loadState(); })
+        .catch(function (err) { toast(err.message, true); });
+    });
+    $("settings-form").addEventListener("input", function (e) { if (e.target.id !== "set-self-policy") settingsDirty = true; });
     $("btn-clear-token").addEventListener("click", function () {
       api("POST", "settings", { clear_token: true }).then(function () {
         toast(t("settings.saved"));

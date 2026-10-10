@@ -54,7 +54,12 @@ func (a *App) writeNotifierStatus() {
 		st.CheckedAt = a.State.LastCheck.Format(time.RFC3339)
 	}
 	if selfHasUpdate(a.Commit, a.State.Self) {
-		st.Items = append(st.Items, notifier.StatusItem{ID: "casamod-store", Type: "store", Name: "CasaMOD Store", Latest: a.State.Self.LatestSHA})
+		if selfPolicy(a.State.Config) == store.PolicyAuto {
+			// The mod updates the app; no notice needed.
+			st.SelfUpdate = &notifier.SelfUpdate{AppID: SelfAppID, Latest: a.State.Self.LatestSHA}
+		} else {
+			st.Items = append(st.Items, notifier.StatusItem{ID: "casamod-store", Type: "store", Name: "CasaMOD Store", Latest: a.State.Self.LatestSHA})
+		}
 	}
 	for _, it := range a.State.SortedLocked() {
 		if it.HasUpdate() {

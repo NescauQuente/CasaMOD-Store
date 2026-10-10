@@ -38,7 +38,8 @@ type Config struct {
 	IncludeCasaMODMods bool     `json:"include_casamod_mods"`
 	Notifier           bool     `json:"notifier"`
 	UIPort             int      `json:"ui_port"`
-	PublicURL          string   `json:"public_url,omitempty"` // link used by the notifier, optional
+	PublicURL          string   `json:"public_url,omitempty"`  // link used by the notifier, optional
+	SelfPolicy         string   `json:"self_policy,omitempty"` // update policy of the store itself
 }
 
 // DefaultCatalogs are the sources every store starts with. Repositories

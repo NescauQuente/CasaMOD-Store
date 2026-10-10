@@ -59,6 +59,15 @@ Quando uma imagem nova é publicada, a loja mostra o **CasaMOD Store** na aba
 app (⋮) → **Verificar e atualizar**. Configurações e itens instalados são
 mantidos: ficam em `/DATA/AppData/casamod-store`.
 
+Para isso acontecer sozinho, coloque o **CasaMOD Store** em *Atualizar
+sozinho* (**Configurações → Atualizações**, ou na linha da loja em
+**Atualizações**). A loja não consegue chamar o CasaOS sozinha (não tem o
+login do CasaOS), então quem faz isso é o mini-mod do aviso: na próxima vez
+que o CasaOS estiver aberto num navegador com alguém logado, ele faz a mesma
+chamada do *Verificar e atualizar*
+(`PATCH /v2/app_management/compose/casamod-store?force=true`), uma vez por
+imagem nova. O `force=true` também ignora a resposta guardada pelo CasaOS.
+
 O CasaOS guarda a resposta da verificação por até 1 hora. Se ele disser que já
 está na última versão logo depois de uma publicação, espere ou rode
 `sudo systemctl restart casaos-app-management` no servidor e verifique de
@@ -146,6 +155,7 @@ endereço para escolher um.
 | Fontes | Uma por linha, veja [Fontes](#fontes). |
 | Mods do CasaMOD | Lista os mods que vêm com o CasaMOD (de `Cp0204/CasaMOD`). |
 | Verificar a cada (horas) | Intervalo da verificação automática; `0` desliga. |
+| CasaMOD Store | Política de atualização da própria loja (veja [Atualizar a loja](#atualizar-a-loja)). |
 | Aviso no CasaOS | Instala o mini-mod do aviso no desktop. |
 | Endereço da loja | Link usado pelo aviso, ex.: `http://casaos.local:8418`. Vazio usa o endereço do CasaOS com a porta da loja. |
 | Porta da loja | Porta usada no link do aviso quando o endereço está vazio. |

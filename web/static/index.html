@@ -94,6 +94,11 @@
           <legend data-i18n="settings.updates">Updates</legend>
           <label for="set-interval" data-i18n="settings.interval">Check every (hours)</label>
           <input type="number" id="set-interval" min="0" max="720" step="0.5">
+          <label for="set-self-policy">CasaMOD Store</label>
+          <select id="set-self-policy">
+            <option value="notify" data-i18n="policy.notify">Notify me</option>
+            <option value="auto" data-i18n="policy.auto">Update automatically</option>
+          </select>
           <label class="check"><input type="checkbox" id="set-notifier"> <span data-i18n="settings.notifier">Notice on CasaOS</span></label>
           <label for="set-public-url" data-i18n="settings.publicUrl">Store address</label>
           <input type="url" id="set-public-url">

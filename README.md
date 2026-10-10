@@ -57,6 +57,14 @@ When a new image is published the store lists **CasaMOD Store** in the
 (⋮) → **Check then update**. Settings and installed items are kept: they live
 in `/DATA/AppData/casamod-store`.
 
+To have it done for you, set **CasaMOD Store** to *Update automatically*
+(**Settings → Updates**, or the store's row in **Updates**). The store
+cannot call CasaOS by itself (it has no CasaOS login), so the desktop notice
+mini-mod does it: the next time CasaOS is open in a browser with someone
+logged in, it makes the same call as *Check then update*
+(`PATCH /v2/app_management/compose/casamod-store?force=true`), once per new
+image. `force=true` also skips CasaOS' cached answer.
+
 CasaOS caches the answer of that check for up to an hour. If it says the app
 is up to date right after a release, wait, or run
 `sudo systemctl restart casaos-app-management` on the server and check again.
@@ -139,6 +147,7 @@ language (English when it is not one of them); add `?lang=de`,
 | Sources | One per line, see [Sources](#sources). |
 | CasaMOD mods | List the mods that ship with CasaMOD (from `Cp0204/CasaMOD`). |
 | Check every (hours) | Interval of the automatic update check; `0` turns it off. |
+| CasaMOD Store | Update policy of the store itself (see [Updating the store](#updating-the-store)). |
 | Notice on CasaOS | Install the desktop notice mini-mod. |
 | Store address | Link used by the notice, e.g. `http://casaos.local:8418`. Leave empty to use the CasaOS address with the store port. |
 | Store port | Port used by the notice link when the address is empty. |

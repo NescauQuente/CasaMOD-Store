@@ -330,6 +330,13 @@ func (a *App) SetPolicy(key, policy string) error {
 		return fmt.Errorf("invalid policy %q", policy)
 	}
 	a.State.Lock()
+	if key == SelfKey {
+		a.State.Config.SelfPolicy = policy
+		err := a.State.SaveLocked()
+		a.State.Unlock()
+		a.writeNotifierStatus()
+		return err
+	}
 	defer a.State.Unlock()
 	it := a.State.Items[key]
 	if it == nil {

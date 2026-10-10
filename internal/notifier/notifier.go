@@ -69,6 +69,16 @@ type Status struct {
 	UIURL     string       `json:"ui_url,omitempty"`
 	CheckedAt string       `json:"checked_at,omitempty"`
 	Items     []StatusItem `json:"items"`
+	// SelfUpdate is set when a newer image of the store is published and its
+	// policy is "auto": the mod then asks CasaOS to update the app, with the
+	// session of the user who has CasaOS open.
+	SelfUpdate *SelfUpdate `json:"self_update,omitempty"`
+}
+
+// SelfUpdate tells the mod which CasaOS app to update and to which image.
+type SelfUpdate struct {
+	AppID  string `json:"app_id"`
+	Latest string `json:"latest"`
 }
 
 // StatusItem is one item with an update waiting.

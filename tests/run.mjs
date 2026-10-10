@@ -111,8 +111,14 @@ for (let i = 0; ; i++) {
 // Fake CasaOS: serves the mock index.html and /mod/ from the CasaMOD folder,
 // like the symlink CasaMOD creates in /var/lib/casaos/www.
 const TYPES = { ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".html": "text/html" };
+const appUpdates = []; // PATCH /v2/app_management/compose/<id> calls (CasaOS "Check then update")
 const casaos = createServer((req, res) => {
   const url = new URL(req.url, "http://x");
+  if (req.method === "PATCH" && url.pathname.startsWith("/v2/app_management/compose/")) {
+    appUpdates.push({ path: url.pathname, force: url.searchParams.get("force"), auth: req.headers.authorization });
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ message: "compose app is being updated asynchronously" }));
+  }
   let file;
   if (url.pathname === "/") file = join(ROOT, "tests/casaos/index.html");
   else if (url.pathname.startsWith("/mod/")) {
@@ -352,6 +358,31 @@ try {
     await casa.waitFor(`!!document.getElementById("casamod-store-notifier")`, { message: "notifier for self update" });
     assert.equal(await casa.text(".casamod-store-notifier-text"), "Updates available: 1");
     assert.match(await casa.eval(`document.getElementById("casamod-store-notifier").title`), /CasaMOD Store/);
+  });
+
+  await test("store set to update itself: the notice asks CasaOS to update it, once", async () => {
+    await page.goto(STORE + "/?lang=pt#updates");
+    const sel = '#updates-list [data-key="store:casamod-store"] select.policy';
+    await page.waitFor(`!!document.querySelector('${sel}')`);
+    await page.eval(`(() => { const s = document.querySelector('${sel}'); s.value = "auto"; s.dispatchEvent(new Event("change")); })()`);
+    const statusFile = join(modDir, "casamod-store-notifier", "status.json");
+    const end = Date.now() + 5000;
+    while (!JSON.parse(readFileSync(statusFile, "utf8")).self_update && Date.now() < end) await sleep(50);
+    const status = JSON.parse(readFileSync(statusFile, "utf8"));
+    assert.deepEqual(status.self_update, { app_id: "casamod-store", latest: "2222222222222222222222222222222222222222" });
+    assert.ok(!status.items.some((i) => i.type === "store"), "store still in the notice");
+    await page.goto(STORE + "/?lang=pt#settings");
+    await page.waitFor(`document.getElementById("set-self-policy").value === "auto"`);
+
+    await casa.eval(`localStorage.setItem("access_token", "tok-123"); localStorage.removeItem("casamod_store_self_update")`);
+    await casa.reload();
+    const end2 = Date.now() + 5000;
+    while (!appUpdates.length && Date.now() < end2) await sleep(50);
+    assert.deepEqual(appUpdates, [{ path: "/v2/app_management/compose/casamod-store", force: "true", auth: "tok-123" }]);
+    await casa.reload();
+    await sleep(800);
+    assert.equal(appUpdates.length, 1, "asked CasaOS twice for the same image");
+    await casa.eval(`localStorage.setItem("access_token", "x")`);
   });
 
   await test("remove a mod restarts CasaMOD; manual folders stay", async () => {
