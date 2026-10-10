@@ -5,7 +5,7 @@
   // ---------------------------------------------------------------- i18n
   var STRINGS = {
     en: {
-      "credits.by": "by", "tab.store": "Store", "tab.installed": "Installed", "tab.updates": "Updates", "tab.settings": "Settings",
+      "credits.by": "by", "lw.text": "Wallpapers need the Live Wallpapers mod, which is not installed.", "lw.install": "Install now", "tab.store": "Store", "tab.installed": "Installed", "tab.updates": "Updates", "tab.settings": "Settings",
       "store.search": "Search mods and wallpapers", "store.refresh": "Refresh", "store.addUrl": "Add from GitHub URL",
       "store.empty": "Nothing found.", "store.clearSelection": "Clear", "store.installSelected": "Install selected",
       "store.selected": "{n} selected", "store.sourceError": "Could not load {source}: {error}",
@@ -49,7 +49,7 @@
       "err.network": "The store did not answer.",
     },
     pt: {
-      "credits.by": "por", "tab.store": "Loja", "tab.installed": "Instalados", "tab.updates": "Atualizações", "tab.settings": "Configurações",
+      "credits.by": "por", "lw.text": "Os wallpapers precisam do mod Live Wallpapers, que não está instalado.", "lw.install": "Instalar agora", "tab.store": "Loja", "tab.installed": "Instalados", "tab.updates": "Atualizações", "tab.settings": "Configurações",
       "store.search": "Buscar mods e wallpapers", "store.refresh": "Recarregar", "store.addUrl": "Adicionar por URL do GitHub",
       "store.empty": "Nada encontrado.", "store.clearSelection": "Limpar", "store.installSelected": "Instalar selecionados",
       "store.selected": "{n} selecionado(s)", "store.sourceError": "Não foi possível carregar {source}: {error}",
@@ -338,7 +338,7 @@
         action = null;
       } else {
         if (manual[k]) badges.push(el("span", { class: "badge warn", text: t("state.manual") }));
-        action = el("button", { class: "btn primary small", text: t("common.install"), onclick: function () { doInstall([toRequest(item)]); } });
+        action = el("button", { class: "btn primary small", text: t("common.install"), onclick: function () { installChecked([toRequest(item)]); } });
       }
       var preview = el("div", { class: "preview" }, [item.preview
         ? el("img", { src: item.preview, alt: "", loading: "lazy", onerror: function () { this.remove(); } })
@@ -503,6 +503,36 @@
     return conflicts;
   }
 
+  // Wallpapers are played by the Live Wallpapers mod: when it is missing,
+  // offer to install it in the same batch (one CasaMOD restart).
+  var LIVE_WALLPAPERS = {
+    id: "live-wallpapers", type: "mod", name: "Live Wallpapers", description: "", origin: "catalog",
+    source: { repo: "UsuarioDeJava/CasaMODs", branch: "", path: "casaos-live-wallpapers/live-wallpapers" }
+  };
+
+  function hasLiveWallpapers() {
+    var re = /^live-?wallpapers?$/i;
+    return state.installed.some(function (i) { return i.type === "mod" && re.test(i.id) && !i.missing; }) ||
+      state.manual.some(function (m) { return m.type === "mod" && re.test(m.id); });
+  }
+
+  function liveWallpapersRequest() {
+    var item = catalog && (catalog.items || []).filter(function (i) {
+      return i.type === "mod" && i.id === LIVE_WALLPAPERS.id;
+    })[0];
+    return item ? toRequest(item) : LIVE_WALLPAPERS;
+  }
+
+  function installChecked(reqs) {
+    var wantsWallpaper = reqs.some(function (r) { return r.type === "wallpaper"; });
+    var hasLW = reqs.some(function (r) { return r.type === "mod" && r.id === LIVE_WALLPAPERS.id; });
+    if (!wantsWallpaper || hasLW || hasLiveWallpapers()) return doInstall(reqs);
+    var dlg = $("dlg-lw");
+    $("btn-lw-ok").onclick = function () { dlg.close(); doInstall(reqs); };
+    $("btn-lw-install").onclick = function () { dlg.close(); doInstall([liveWallpapersRequest()].concat(reqs)); };
+    dlg.showModal();
+  }
+
   function doInstall(reqs) {
     var names = reqs.map(function (r) { return r.name || r.id; });
     return run(api("POST", "install", { items: reqs })).then(function (res) {
@@ -577,7 +607,7 @@
       origin: "url", policy: $("url-policy").value
     };
     $("dlg-url").close();
-    doInstall([req]);
+    installChecked([req]);
   }
 
   // ---------------------------------------------------------------- wiring
@@ -603,7 +633,7 @@
       var reqs = Object.keys(selected).map(function (k) { return toRequest(selected[k]); });
       selected = {};
       renderSelection();
-      doInstall(reqs);
+      installChecked(reqs);
     });
     $("btn-check").addEventListener("click", function () {
       run(api("POST", "check")).then(function () { toast(t("done.checked")); }).catch(function (e) { toast(e.message, true); });

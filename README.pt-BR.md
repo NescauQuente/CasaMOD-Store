@@ -109,6 +109,9 @@ enviado de volta ao navegador.
 - **Adicionar por URL do GitHub**: cole a URL de um repositório, pasta ou
   arquivo, clique em **Ler**, confira repositório, branch, pasta, ID (nome da
   pasta), tipo e política de atualização e clique em **Instalar**.
+- Instalar um wallpaper sem o mod **Live Wallpapers** instalado pergunta
+  antes: **Instalar agora** inclui o Live Wallpapers na mesma instalação (um
+  único reinício do CasaMOD), **OK** instala só o wallpaper.
 - **Recarregar** busca as fontes na hora, sem esperar os 30 minutos do cache.
 - Avisos sobre fontes fora das regras de pastas aparecem acima dos cards (veja
   [Fontes](#fontes)).

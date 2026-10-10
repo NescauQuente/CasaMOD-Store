@@ -103,6 +103,9 @@ never sent back to the browser.
 - **Add from GitHub URL**: paste a repository, folder or file URL, press
   **Read**, check the repository, branch, folder, id (folder name), type and
   update policy, then **Install**.
+- Installing a wallpaper while the **Live Wallpapers** mod is missing asks
+  first: **Install now** adds Live Wallpapers to the same install (one
+  CasaMOD restart), **OK** installs only the wallpaper.
 - **Refresh** reloads the sources now instead of waiting for the 30 minute
   cache.
 - Warnings about sources that break the folder rules appear above the cards

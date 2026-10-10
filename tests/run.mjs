@@ -393,6 +393,46 @@ try {
     await page.waitFor(`document.getElementById("set-token").placeholder === "ghp_…"`);
   });
 
+  await test("installing a wallpaper without Live Wallpapers offers it", async () => {
+    const post = (path, body) => fetch(STORE + "/api/" + path, {
+      method: "POST", headers: { "X-CasaMOD-Store": "1", "Content-Type": "application/json" }, body: JSON.stringify(body),
+    }).then((r) => r.json());
+    await post("remove", { keys: ["mod:live-wallpapers"] });
+    const before = restarts.length;
+    await page.goto(STORE + "/?lang=pt#store");
+    const plexus = '.card[data-key="wallpaper:plexus-wallpaper"] .actions .btn';
+    await page.waitFor(`!!document.querySelector('${plexus}')`);
+
+    // OK: only the wallpaper is installed.
+    await page.click(plexus);
+    await page.waitFor(`document.getElementById("dlg-lw").open`, { message: "dialog" });
+    assert.equal(await page.text("#dlg-lw p"), "Os wallpapers precisam do mod Live Wallpapers, que não está instalado.");
+    await shot("07c-live-wallpapers-dialog");
+    await page.click("#btn-lw-ok");
+    await page.waitFor(`!!document.querySelector('.card[data-key="wallpaper:plexus-wallpaper"] .badge.ok')`, { message: "wallpaper installed" });
+    assert.equal(existsSync(join(modDir, "live-wallpapers")), false);
+
+    // Install now: Live Wallpapers comes along, with one restart.
+    await post("remove", { keys: ["wallpaper:plexus-wallpaper"] });
+    await page.goto(STORE + "/?lang=pt#store");
+    await page.waitFor(`!!document.querySelector('${plexus}')`);
+    await page.click(plexus);
+    await page.waitFor(`document.getElementById("dlg-lw").open`);
+    await page.click("#btn-lw-install");
+    await page.waitFor(`!!document.querySelector('.card[data-key="mod:live-wallpapers"] .badge.ok') && !!document.querySelector('.card[data-key="wallpaper:plexus-wallpaper"] .badge.ok')`, { message: "both installed" });
+    assert.ok(existsSync(join(modDir, "live-wallpapers", "mod.js")));
+    assert.ok(existsSync(join(modDir, "wallpapers", "plexus-wallpaper", "index.html")));
+    await waitRestarts(before + 2); // one for the removal, one for the batch
+
+    // With Live Wallpapers present there is no question.
+    await post("remove", { keys: ["wallpaper:plexus-wallpaper"] });
+    await page.goto(STORE + "/?lang=pt#store");
+    await page.waitFor(`!!document.querySelector('${plexus}')`);
+    await page.click(plexus);
+    await page.waitFor(`!!document.querySelector('.card[data-key="wallpaper:plexus-wallpaper"] .badge.ok')`);
+    assert.equal(await page.eval(`document.getElementById("dlg-lw").open`), false);
+  });
+
   await test("missing Docker socket is shown", async () => {
     await new Promise((r) => docker.close(r));
     rmSync(dockerSock, { force: true });
