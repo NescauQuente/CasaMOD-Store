@@ -28,9 +28,6 @@ type Item struct {
 	Source      github.Source `json:"source"`
 	Origin      string        `json:"origin"`
 	OriginLabel string        `json:"origin_label"`
-
-	title   string // project.json title (discovery only)
-	dropped bool   // discovery: not an installable item
 }
 
 // catalogFile is the store.json format. A bare array of items is accepted too.

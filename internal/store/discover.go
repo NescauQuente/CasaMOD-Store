@@ -56,40 +56,23 @@ func Discover(ctx context.Context, gh *github.Client, src github.Source) (label 
 		}
 		files[dir][name] = true
 	}
-	// Wallpaper Engine projects (project.json) come first: a folder that
-	// holds one is a wallpaper project, even if it also carries a stray
-	// mod.js, and nothing inside a project is a separate item.
-	projects := map[string]string{}
-	for dir, names := range files {
-		if names["project.json"] {
-			projects[dir] = installer.TypeWallpaper
-		}
-	}
 	types := map[string]string{}
-	for dir := range projects {
-		if !hasAncestor(dir, projects) {
-			types[dir] = installer.TypeWallpaper
-		}
-	}
-	others := map[string]string{}
 	for dir, names := range files {
 		switch {
-		case projects[dir] != "":
 		case names["mod.js"] || names["mod.css"]:
-			others[dir] = installer.TypeMod
+			types[dir] = installer.TypeMod
+		case names["project.json"]:
+			types[dir] = installer.TypeWallpaper
 		case names["index.html"] && dir != src.Path:
 			// A page at the root of the source is usually a demo or gallery.
-			others[dir] = installer.TypeWallpaper
-		}
-	}
-	for dir, typ := range others {
-		if !hasAncestor(dir, others) && !hasAncestor(dir, projects) && !hasDescendant(dir, projects) {
-			types[dir] = typ
+			types[dir] = installer.TypeWallpaper
 		}
 	}
 	var dirs []string
 	for dir := range types {
-		dirs = append(dirs, dir)
+		if !hasAncestor(dir, types) {
+			dirs = append(dirs, dir)
+		}
 	}
 	sort.Strings(dirs)
 	if len(dirs) > maxDiscovered {
@@ -98,50 +81,24 @@ func Discover(ctx context.Context, gh *github.Client, src github.Source) (label 
 
 	items = make([]Item, 0, len(dirs))
 	for _, dir := range dirs {
+		itemSrc := github.Source{Repo: src.Repo, Branch: src.Branch, Path: dir}
+		id := DefaultID(itemSrc)
+		typ := types[dir]
+		if installer.ValidateID(typ, id) != nil {
+			continue
+		}
 		items = append(items, Item{
-			Type: types[dir], Source: github.Source{Repo: src.Repo, Branch: src.Branch, Path: dir},
+			ID: id, Type: typ, Name: id, Source: itemSrc,
 			Origin: OriginCatalog, OriginLabel: label,
 		})
 	}
 	describe(ctx, gh, ref, items, files)
-
-	// Ids are folder names, except for wallpapers named by their project:
-	// "wallpaper-engine/" folders become "starry-orbit", "neural-plexus"...
-	out := items[:0]
-	seen := map[string]bool{}
-	for _, it := range items {
-		if it.dropped {
-			continue
-		}
-		id := DefaultID(it.Source)
-		if it.Type == installer.TypeWallpaper && slug(it.title) != "" {
-			id = slug(it.title)
-		}
-		if it.Name == "" {
-			it.Name = id
-		}
-		it.ID = id
-		if installer.ValidateID(it.Type, id) != nil || seen[it.Type+":"+id] {
-			continue
-		}
-		seen[it.Type+":"+id] = true
-		out = append(out, it)
-	}
-	return label, out, nil
+	return label, items, nil
 }
 
 func skipped(dir string) bool {
 	for _, part := range strings.Split(dir, "/") {
 		if strings.HasPrefix(part, ".") || skipDirs[strings.ToLower(part)] {
-			return true
-		}
-	}
-	return false
-}
-
-func hasDescendant(dir string, set map[string]string) bool {
-	for d := range set {
-		if d != dir && (dir == "" || strings.HasPrefix(d, dir+"/")) {
 			return true
 		}
 	}
@@ -195,18 +152,9 @@ func describe(ctx context.Context, gh *github.Client, ref string, items []Item, 
 				Version     string `json:"version"`
 				Author      string `json:"author"`
 				Preview     string `json:"preview"`
-				Type        string `json:"type"`
 			}
 			if json.Unmarshal(data, &m) != nil {
 				return
-			}
-			if meta == "project.json" {
-				// Only web wallpapers run in a browser.
-				if t := strings.ToLower(m.Type); t != "" && t != "web" {
-					it.dropped = true
-					return
-				}
-				it.title = strings.TrimSpace(m.Title)
 			}
 			if t := strings.TrimSpace(firstOf(m.Title, m.Name)); t != "" {
 				it.Name = t
@@ -233,24 +181,4 @@ func firstOf(s ...string) string {
 		}
 	}
 	return ""
-}
-
-// slug turns a title into a folder name: "Starry Orbit" -> "starry-orbit".
-func slug(title string) string {
-	var b strings.Builder
-	dash := false
-	for _, r := range strings.ToLower(title) {
-		if r >= 'a' && r <= 'z' || r >= '0' && r <= '9' {
-			b.WriteRune(r)
-			dash = false
-		} else if !dash && b.Len() > 0 {
-			b.WriteByte('-')
-			dash = true
-		}
-	}
-	id := strings.Trim(b.String(), "-")
-	if len(id) > 64 {
-		id = strings.Trim(id[:64], "-")
-	}
-	return id
 }
