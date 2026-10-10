@@ -49,7 +49,7 @@ func (a *App) writeNotifierStatus() {
 		return
 	}
 	a.State.Lock()
-	st := notifier.Status{Version: 1, UIPort: a.State.Config.UIPort, UIURL: a.State.Config.PublicURL, Items: []notifier.StatusItem{}}
+	st := notifier.Status{Version: 1, UIPort: a.State.Config.UIPort, UIURL: a.State.Config.PublicURL, Items: []notifier.StatusItem{}, Script: notifier.ScriptVersion()}
 	if !a.State.LastCheck.IsZero() {
 		st.CheckedAt = a.State.LastCheck.Format(time.RFC3339)
 	}

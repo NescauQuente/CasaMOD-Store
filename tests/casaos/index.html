@@ -8,6 +8,19 @@
 </head>
 <body>
   <div id="app"><div class="ps-container" style="padding: 24px; color: #fff">CasaOS desktop (mock)</div></div>
+  <script>
+    // With ?vue=1, stand in for CasaOS' Vue app and its API client
+    // ($openAPI), which the notifier prefers over a plain fetch.
+    if (/[?&]vue=1/.test(location.search)) {
+      window.__updateCalls = [];
+      document.getElementById("app").__vue__ = { $openAPI: { appManagement: { compose: {
+        updateComposeApp: function (id, force) {
+          window.__updateCalls.push([id, force]);
+          return Promise.resolve({ status: 200, data: { message: "compose app is being updated asynchronously" } });
+        }
+      } } } };
+    }
+  </script>
   <script type="text/javascript" src="mod/casamod-store-notifier/mod.js"></script>
 </body>
 </html>

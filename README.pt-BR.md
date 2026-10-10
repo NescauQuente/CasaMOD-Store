@@ -65,8 +65,11 @@ sozinho* (**Configurações → Atualizações**, ou na linha da loja em
 login do CasaOS), então quem faz isso é o mini-mod do aviso: na próxima vez
 que o CasaOS estiver aberto num navegador com alguém logado, ele faz a mesma
 chamada do *Verificar e atualizar*
-(`PATCH /v2/app_management/compose/casamod-store?force=true`), uma vez por
-imagem nova. O `force=true` também ignora a resposta guardada pelo CasaOS.
+(`PATCH /v2/app_management/compose/casamod-store?force=true`, pelo próprio
+cliente de API do CasaOS, que renova a sessão), uma vez por imagem nova. O
+`force=true` também ignora a resposta guardada pelo CasaOS. A loja procura
+imagem nova de si mesma a cada hora, o aviso relê o status a cada 10 minutos
+e o resultado de cada pedido aparece em **Atividade**.
 
 O CasaOS guarda a resposta da verificação por até 1 hora. Se ele disser que já
 está na última versão logo depois de uma publicação, espere ou rode

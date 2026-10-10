@@ -4,7 +4,9 @@ package notifier
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"embed"
+	"encoding/hex"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -35,6 +37,13 @@ func Files() map[string][]byte {
 		return nil
 	})
 	return out
+}
+
+// ScriptVersion is a short hash of notifier.js.
+func ScriptVersion() string {
+	data, _ := embedded.ReadFile("files/notifier.js")
+	sum := sha1.Sum(data)
+	return hex.EncodeToString(sum[:6])
 }
 
 // UpToDate reports whether dir holds exactly the embedded files (status.json aside).
@@ -69,6 +78,9 @@ type Status struct {
 	UIURL     string       `json:"ui_url,omitempty"`
 	CheckedAt string       `json:"checked_at,omitempty"`
 	Items     []StatusItem `json:"items"`
+	// Script is the version of notifier.js; mod.js loads it with this value
+	// in the URL so browsers never run a stale copy.
+	Script string `json:"script"`
 	// SelfUpdate is set when a newer image of the store is published and its
 	// policy is "auto": the mod then asks CasaOS to update the app, with the
 	// session of the user who has CasaOS open.

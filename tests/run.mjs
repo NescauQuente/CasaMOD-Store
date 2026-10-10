@@ -388,6 +388,22 @@ try {
     await casa.reload();
     await sleep(800);
     assert.equal(appUpdates.length, 1, "asked CasaOS twice for the same image");
+    // The notifier reports back; the store logs it.
+    const end3 = Date.now() + 5000;
+    let logged = false;
+    while (!logged && Date.now() < end3) {
+      const st = await (await fetch(STORE + "/api/state")).json();
+      logged = st.log.some((l) => /CasaOS was asked to update CasaMOD Store/.test(l.message));
+      if (!logged) await sleep(100);
+    }
+    assert.ok(logged, "self-update report not logged");
+    // Inside the real CasaOS page the notifier uses CasaOS' own API client
+    // (it renews the session), not a plain fetch.
+    await casa.eval(`localStorage.removeItem("casamod_store_self_update")`);
+    await casa.goto(CASAOS + "/?vue=1");
+    await casa.waitFor(`window.__updateCalls && window.__updateCalls.length === 1`, { message: "$openAPI call" });
+    assert.deepEqual(await casa.eval(`window.__updateCalls[0]`), ["casamod-store", true]);
+    assert.equal(appUpdates.length, 1, "fetch used although $openAPI exists");
     await casa.eval(`localStorage.setItem("access_token", "x")`);
   });
 

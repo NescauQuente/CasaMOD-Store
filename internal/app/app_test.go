@@ -358,7 +358,7 @@ func TestNotifier(t *testing.T) {
 	if err := json.Unmarshal([]byte(readFile(t, filepath.Join(dir, notifier.StatusFile))), &st); err != nil {
 		t.Fatal(err)
 	}
-	if len(st.Items) != 1 || st.Items[0].ID != "a" || st.UIPort != 8418 {
+	if len(st.Items) != 1 || st.Items[0].ID != "a" || st.UIPort != 8418 || st.Script != notifier.ScriptVersion() || len(st.Script) != 12 {
 		t.Fatalf("status = %+v", st)
 	}
 	// The notifier is not listed as a manual mod and cannot be installed over.
@@ -447,6 +447,13 @@ func TestHTTPGuardAndAPI(t *testing.T) {
 	cfg := st["config"].(map[string]any)
 	if cfg["has_token"] != true || cfg["check_interval_hours"] != 12.0 {
 		t.Fatalf("config: %+v", cfg)
+	}
+	resp, _ = http.Get(srv.URL + "/api/notifier/report?event=self_update&result=error&detail=HTTP%20401%0Abad")
+	if resp.StatusCode != http.StatusOK || resp.Header.Get("Content-Type") != "image/gif" {
+		t.Fatalf("report: %d %s", resp.StatusCode, resp.Header.Get("Content-Type"))
+	}
+	if l := e.app.log[len(e.app.log)-1]; l.Level != "error" || l.Message != "Asking CasaOS to update CasaMOD Store failed: HTTP 401 bad" {
+		t.Fatalf("report log: %+v", l)
 	}
 	out = post("/api/resolve", `{"url":"https://github.com/me/walls/tree/main/star-wallpaper"}`)
 	if out["id"] != "star-wallpaper" || out["type"] != "wallpaper" {

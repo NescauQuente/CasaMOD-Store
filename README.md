@@ -62,8 +62,11 @@ To have it done for you, set **CasaMOD Store** to *Update automatically*
 cannot call CasaOS by itself (it has no CasaOS login), so the desktop notice
 mini-mod does it: the next time CasaOS is open in a browser with someone
 logged in, it makes the same call as *Check then update*
-(`PATCH /v2/app_management/compose/casamod-store?force=true`), once per new
-image. `force=true` also skips CasaOS' cached answer.
+(`PATCH /v2/app_management/compose/casamod-store?force=true`, through CasaOS'
+own API client, which renews the session), once per new image.
+`force=true` also skips CasaOS' cached answer. The store looks for a new
+image of itself every hour, the notice re-reads its status every 10 minutes,
+and the result of each request is written to **Activity**.
 
 CasaOS caches the answer of that check for up to an hour. If it says the app
 is up to date right after a release, wait, or run

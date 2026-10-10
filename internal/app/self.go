@@ -79,3 +79,26 @@ func (a *App) checkSelf(ctx context.Context) {
 		a.Logf("error", "Checking for a new version of the store failed: %v", err)
 	}
 }
+
+// selfCheckEvery is how often the store looks for a new image of itself,
+// independently of the (possibly long) update check interval.
+var selfCheckEvery = time.Hour
+
+func (a *App) runSelfChecks(ctx context.Context) {
+	t := time.NewTimer(2 * time.Minute)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+		}
+		cctx, cancel := context.WithTimeout(ctx, time.Minute)
+		a.op.Lock()
+		a.checkSelf(cctx)
+		a.op.Unlock()
+		cancel()
+		a.writeNotifierStatus()
+		t.Reset(selfCheckEvery)
+	}
+}

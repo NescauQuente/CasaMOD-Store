@@ -622,6 +622,7 @@ func (a *App) Manual() []ManualItem {
 
 // Run performs the periodic update checks until ctx ends.
 func (a *App) Run(ctx context.Context) {
+	go a.runSelfChecks(ctx)
 	first := time.Minute
 	for {
 		a.State.Lock()

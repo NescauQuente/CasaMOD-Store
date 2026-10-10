@@ -26,6 +26,7 @@ func (a *App) Handler(webFS fs.FS) http.Handler {
 	mux.HandleFunc("POST /api/policy", a.handlePolicy)
 	mux.HandleFunc("POST /api/settings", a.handleSettings)
 	mux.HandleFunc("POST /api/restart", a.handleRestart)
+	mux.HandleFunc("GET /api/notifier/report", a.handleNotifierReport)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
 	files := http.FileServer(http.FS(webFS))
 	mux.Handle("GET /", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -382,4 +383,32 @@ func (a *App) handleRestart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
+// handleNotifierReport records what happened when the notifier mini-mod
+// asked CasaOS to update the store (it can only reach us with a plain GET,
+// as an image, from the CasaOS page). It only writes to the activity log.
+func (a *App) handleNotifierReport(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	detail := q.Get("detail")
+	if len(detail) > 200 {
+		detail = detail[:200]
+	}
+	detail = strings.Map(func(c rune) rune {
+		if c < 32 {
+			return ' '
+		}
+		return c
+	}, detail)
+	if q.Get("event") == "self_update" {
+		if q.Get("result") == "ok" {
+			a.Logf("info", "CasaOS was asked to update CasaMOD Store: %s", detail)
+		} else {
+			a.Logf("error", "Asking CasaOS to update CasaMOD Store failed: %s", detail)
+		}
+	}
+	w.Header().Set("Content-Type", "image/gif")
+	w.Header().Set("Cache-Control", "no-store")
+	// 1x1 transparent GIF.
+	w.Write([]byte("GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"))
 }
