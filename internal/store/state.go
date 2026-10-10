@@ -40,14 +40,19 @@ type Config struct {
 	PublicURL          string   `json:"public_url,omitempty"` // link used by the notifier, optional
 }
 
-// DefaultCatalog is the catalog of this project.
-const DefaultCatalog = "https://github.com/NescauQuente/CasaMOD-Store/blob/main/store.json"
+// DefaultCatalogs are the sources every store starts with. Repositories
+// without a store.json are scanned for mods and wallpapers.
+var DefaultCatalogs = []string{"NescauQuente/CasaMODs", "NescauQuente/WE-Wallpapers"}
+
+// oldDefaultCatalog was the default before DefaultCatalogs; configs that
+// still hold only it are migrated.
+const oldDefaultCatalog = "https://github.com/NescauQuente/CasaMOD-Store/blob/main/store.json"
 
 // DefaultConfig returns the configuration used on first start.
 func DefaultConfig() Config {
 	return Config{
 		CheckIntervalHours: 6,
-		Catalogs:           []string{DefaultCatalog},
+		Catalogs:           append([]string(nil), DefaultCatalogs...),
 		CasaMODContainer:   "casamod",
 		IncludeCasaMODMods: true,
 		Notifier:           true,
@@ -119,6 +124,9 @@ func Load(dir string) (*State, error) {
 	s := &State{dir: dir, Config: DefaultConfig(), Items: map[string]*Installed{}}
 	if err := readJSON(filepath.Join(dir, "config.json"), &s.Config); err != nil {
 		return nil, err
+	}
+	if len(s.Config.Catalogs) == 1 && s.Config.Catalogs[0] == oldDefaultCatalog {
+		s.Config.Catalogs = append([]string(nil), DefaultCatalogs...)
 	}
 	var inst installedFile
 	if err := readJSON(filepath.Join(dir, "installed.json"), &inst); err != nil {

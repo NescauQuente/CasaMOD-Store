@@ -55,6 +55,9 @@ type CatalogRef struct {
 	Src  github.Source // Path is the store.json file
 	URL  string        // set for non GitHub URLs
 	Text string
+	// Folder is set when a repository or folder was given (not a .json
+	// file): without a store.json there, its contents are discovered.
+	Folder bool
 }
 
 // ParseCatalogRef accepts "owner/repo", GitHub repo/tree/blob URLs, raw
@@ -82,6 +85,7 @@ func ParseCatalogRef(raw string) (CatalogRef, error) {
 		src.Path = path.Join(src.Path, path.Base(strings.SplitN(raw, "?", 2)[0]))
 	} else {
 		src.Path = path.Join(src.Path, "store.json")
+		ref.Folder = true
 	}
 	ref.Src = src
 	return ref, nil
@@ -102,6 +106,14 @@ func LoadCatalog(ctx context.Context, gh *github.Client, raw string) (label stri
 	label = ref.Src.Repo
 	if ref.URL != "" {
 		label = ref.URL
+	}
+	if err != nil && ref.Folder && errors.Is(err, github.ErrNotFound) {
+		dir := ref.Src
+		dir.Path = path.Dir(dir.Path)
+		if dir.Path == "." {
+			dir.Path = ""
+		}
+		return Discover(ctx, gh, dir)
 	}
 	if err != nil {
 		return label, nil, err

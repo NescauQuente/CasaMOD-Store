@@ -26,6 +26,8 @@ wallpapers from GitHub, with a web UI and a notifier mini-mod. See README.md.
 - `Apps/casamod-store/docker-compose.yml`: the app, served as a CasaOS app
   store source (repo zip). CasaOS' "Check then update" compares the `latest`
   digest only for apps found in a source.
+- `internal/store/discover.go`: sources without store.json are scanned
+  (default sources: NescauQuente/CasaMODs and NescauQuente/WE-Wallpapers).
 - `web/static`: plain HTML/CSS/JS, embedded; texts in `en` and `pt`.
 
 ## Tests

@@ -4,8 +4,10 @@ A store for [CasaMOD](https://github.com/Cp0204/CasaMOD): install, update and
 remove CasaMOD **mods** and **wallpapers** straight from GitHub, from a web UI
 that opens from the app icon in CasaOS.
 
-- **Store**: items from `store.json` catalogs, the mods that ship with
-  CasaMOD, or any GitHub repository/folder pasted as a URL.
+- **Store**: items from source repositories (by default
+  [CasaMODs](https://github.com/NescauQuente/CasaMODs) and
+  [WE-Wallpapers](https://github.com/NescauQuente/WE-Wallpapers)), the mods
+  that ship with CasaMOD, or any GitHub repository/folder pasted as a URL.
 - **Updates**: checked every 6 hours (configurable) or on demand. Per item you
   choose *Notify me* (default) or *Update automatically*.
 - **Desktop notice**: a tiny mini-mod (`casamod-store-notifier`) shows a
@@ -78,7 +80,26 @@ enough for a few dozen items. Add a token in **Settings** to install from
 private repositories or to raise the limit to 5000/hour. A fine-grained token
 with read-only *Contents* access to the repositories you need is enough.
 
-## Catalog format (`store.json`)
+## Sources
+
+A source is a GitHub repository (or a folder of one) added in **Settings**.
+Without a `store.json`, the store reads the repository tree (one API call)
+and lists:
+
+- every folder with `mod.js` or `mod.css` at its root as a **mod**;
+- every folder with `project.json` (Wallpaper Engine) or `index.html` as a
+  **wallpaper**;
+
+taking only the outermost match and skipping hidden, `test(s)`, `docs`,
+`examples` and `node_modules` folders. The folder name is the id; name,
+description, version and preview come from `mod.json` / `project.json`.
+New folders appear in the store on their own, and installed items follow
+every commit to their folder.
+
+### Optional `store.json`
+
+A `store.json` at the root of a source replaces the scan and lists the
+items explicitly:
 
 ```json
 {
@@ -107,9 +128,8 @@ with read-only *Contents* access to the repositories you need is enough.
   repository's default branch; `path`: defaults to the repository root.
 - `preview`: a URL, or a path relative to the item folder (`/` = repo root).
 
-Catalogs are added in **Settings** as `owner/repo` (uses `store.json` at the
-root), a GitHub URL to a folder or file, or any https URL. This repository's
-[`store.json`](store.json) is the default catalog.
+Sources are written as `owner/repo`, a GitHub URL to a folder, a GitHub URL
+to a `.json` file, or any https URL to a catalog file.
 
 ## Configuration
 
