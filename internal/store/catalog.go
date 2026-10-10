@@ -25,6 +25,7 @@ type Item struct {
 	Author      string        `json:"author,omitempty"`
 	Version     string        `json:"version,omitempty"`
 	Preview     string        `json:"preview,omitempty"`
+	Avatar      string        `json:"avatar,omitempty"` // owner's GitHub picture, used when there is no preview
 	Source      github.Source `json:"source"`
 	Origin      string        `json:"origin"`
 	OriginLabel string        `json:"origin_label"`
@@ -313,4 +314,14 @@ func readmeSummary(p string) string {
 		s = s[:297] + "..."
 	}
 	return s
+}
+
+// OwnerAvatar is the GitHub picture of a repository's owner; github.com
+// redirects it to avatars.githubusercontent.com without an API call.
+func OwnerAvatar(repo string) string {
+	owner, _, _ := strings.Cut(repo, "/")
+	if owner == "" {
+		return ""
+	}
+	return "https://github.com/" + url.PathEscape(owner) + ".png?size=160"
 }

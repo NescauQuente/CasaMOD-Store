@@ -575,6 +575,7 @@ func (a *App) Catalog(ctx context.Context, refresh bool) ([]store.Item, []Source
 				continue
 			}
 			seen[k] = true
+			it.Avatar = store.OwnerAvatar(it.Source.Repo)
 			items = append(items, it)
 		}
 	}

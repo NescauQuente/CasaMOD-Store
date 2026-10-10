@@ -307,6 +307,9 @@ func TestCatalogs(t *testing.T) {
 		t.Fatalf("star = %+v", byID["star"])
 	}
 	sd := byID["show-dotfiles"]
+	if sd.Avatar != "https://github.com/Cp0204.png?size=160" || live.Avatar != "https://github.com/me.png?size=160" {
+		t.Fatalf("avatars: %q %q", sd.Avatar, live.Avatar)
+	}
 	if sd.Origin != store.OriginCasaMOD || sd.Description != "Show dot files" || sd.Source.Path != "app/mod/show-dotfiles" {
 		t.Fatalf("show-dotfiles = %+v", sd)
 	}

@@ -194,6 +194,9 @@ try {
     await page.eval(`(() => { const s = document.getElementById("search"); s.value = ""; s.dispatchEvent(new Event("input")); })()`);
     assert.deepEqual(await page.eval(`[...document.querySelectorAll(".credits a")].map(a => a.href)`),
       ["https://github.com/UsuarioDeJava/CasaMOD-Store", "https://github.com/UsuarioDeJava"]);
+    // Without a preview the owner's GitHub picture is tried, then the icon
+    // (github.com is not reachable from the tests, so the icon remains).
+    await page.waitFor(`[...document.querySelectorAll("#store-grid .preview")].every(p => p.querySelector("img") || /🧩|🖼/.test(p.textContent))`);
     await shot("01-store");
   });
 

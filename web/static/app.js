@@ -293,9 +293,7 @@
         if (manual[k]) badges.push(el("span", { class: "badge warn", text: t("state.manual") }));
         action = el("button", { class: "btn primary small", text: t("common.install"), onclick: function () { installChecked([toRequest(item)]); } });
       }
-      var preview = el("div", { class: "preview" }, [item.preview
-        ? el("img", { src: item.preview, alt: "", loading: "lazy", onerror: function () { this.remove(); } })
-        : null, item.preview ? null : (item.type === "wallpaper" ? "🖼" : "🧩")]);
+      var preview = cardPicture(item);
       var checkbox = sameSource ? null : el("input", {
         type: "checkbox", class: "select", "aria-label": item.name, checked: !!selected[ik],
         onchange: function (e) {
@@ -320,6 +318,23 @@
       grid.appendChild(card);
     });
     renderSelection();
+  }
+
+  // The card picture: the item's preview, else its owner's GitHub picture,
+  // else an icon. Each step falls back to the next when it fails to load.
+  function cardPicture(item) {
+    var box = el("div", { class: "preview" });
+    var icon = item.type === "wallpaper" ? "🖼" : "🧩";
+    var steps = [];
+    if (item.preview) steps.push({ src: item.preview, cls: "" });
+    if (item.avatar) steps.push({ src: item.avatar, cls: "avatar" });
+    (function next() {
+      box.textContent = "";
+      var step = steps.shift();
+      if (!step) { box.textContent = icon; return; }
+      box.appendChild(el("img", { src: step.src, alt: "", loading: "lazy", class: step.cls || null, onerror: next }));
+    })();
+    return box;
   }
 
   function renderSelection() {

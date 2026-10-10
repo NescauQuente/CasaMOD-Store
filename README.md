@@ -218,8 +218,9 @@ Rules:
    used.
 7. **Card picture**: put `preview.png` (or `.jpg`, `.jpeg`, `.webp`,
    `.gif`) at the root of the item folder. A `preview` named in
-   `mod.json`/`project.json` takes precedence. Pictures are loaded by the
-   browser straight from GitHub, so they only show for public
+   `mod.json`/`project.json` takes precedence. Without either, the card
+   shows the GitHub picture of the repository's owner. Pictures are loaded
+   by the browser straight from GitHub, so previews only show for public
    repositories.
 
 Example layout:

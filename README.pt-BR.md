@@ -226,8 +226,10 @@ Regras:
    `project.json` (wallpapers) quando existem; senão, vale o nome da pasta.
 7. **Foto do card**: coloque um `preview.png` (ou `.jpg`, `.jpeg`, `.webp`,
    `.gif`) na raiz da pasta do item. Um `preview` indicado no
-   `mod.json`/`project.json` tem prioridade. As fotos são carregadas pelo
-   navegador direto do GitHub, então só aparecem em repositórios públicos.
+   `mod.json`/`project.json` tem prioridade. Sem nenhum dos dois, o card
+   mostra a foto do GitHub do dono do repositório. As fotos são carregadas
+   pelo navegador direto do GitHub, então as prévias só aparecem em
+   repositórios públicos.
 
 Exemplo de estrutura:
 
