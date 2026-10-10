@@ -53,6 +53,9 @@ func (a *App) writeNotifierStatus() {
 	if !a.State.LastCheck.IsZero() {
 		st.CheckedAt = a.State.LastCheck.Format(time.RFC3339)
 	}
+	if selfHasUpdate(a.Commit, a.State.Self) {
+		st.Items = append(st.Items, notifier.StatusItem{ID: "casamod-store", Type: "store", Name: "CasaMOD Store", Latest: a.State.Self.LatestSHA})
+	}
 	for _, it := range a.State.SortedLocked() {
 		if it.HasUpdate() {
 			st.Items = append(st.Items, notifier.StatusItem{ID: it.ID, Type: it.Type, Name: it.Name, Latest: it.LatestSHA})

@@ -31,6 +31,7 @@ type App struct {
 	Restart     *docker.Restarter
 	ModStoreDir string
 	Version     string
+	Commit      string // commit the binary was built from ("" for local builds)
 
 	op sync.Mutex // one install/update/remove/check at a time
 
@@ -77,6 +78,7 @@ type Options struct {
 	CasaMODDir   string // /DATA/AppData/casamod
 	DockerSocket string
 	Version      string
+	Commit       string
 	RestartDelay time.Duration
 }
 
@@ -92,6 +94,7 @@ func New(opt Options) (*App, error) {
 		Docker:      docker.New(opt.DockerSocket),
 		ModStoreDir: filepath.Join(opt.CasaMODDir, "mod_store"),
 		Version:     opt.Version,
+		Commit:      opt.Commit,
 		wake:        make(chan struct{}, 1),
 	}
 	a.GH = github.New(st.Token)
@@ -484,6 +487,9 @@ func (a *App) Check(ctx context.Context) error {
 			continue
 		}
 		updates++
+	}
+	if !errors.Is(firstErr, github.ErrRateLimited) {
+		a.checkSelf(ctx)
 	}
 	a.State.Lock()
 	a.State.LastCheck = time.Now().UTC()

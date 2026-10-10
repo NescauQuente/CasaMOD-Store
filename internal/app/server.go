@@ -106,6 +106,7 @@ func (a *App) handleState(w http.ResponseWriter, r *http.Request) {
 		items = append(items, installedView{Installed: &cp, Key: it.Key(), HasUpdate: it.HasUpdate()})
 	}
 	lastCheck := a.State.LastCheck
+	self := a.selfViewLocked()
 	a.State.Unlock()
 	for i := range items {
 		items[i].Missing = !a.Inst.Exists(items[i].Type, items[i].ID)
@@ -130,6 +131,7 @@ func (a *App) handleState(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"version":          a.Version,
+		"self":             self,
 		"busy":             busy,
 		"restart":          restart,
 		"docker_available": a.Docker.Available(),

@@ -34,8 +34,14 @@ jobs:
       - name: Go tests
         run: go test ./...
 
-      - name: Image name (lowercase)
-        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - name: Image name (lowercase) and version
+        run: |
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            echo "VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          else
+            echo "VERSION=main-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          fi
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -71,7 +77,8 @@ jobs:
             linux/arm/v7
             linux/arm64
           build-args: |
-            VERSION=${{ github.ref_type == 'tag' && github.ref_name || format('main-{0}', github.sha) }}
+            VERSION=${{ env.VERSION }}
+            COMMIT=${{ github.sha }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

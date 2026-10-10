@@ -12,6 +12,8 @@ import (
 	"github.com/nescauquente/casamod-store/internal/fakegithub"
 )
 
+const selfCommit = "1111111111111111111111111111111111111111"
+
 func main() {
 	addr := flag.String("addr", "127.0.0.1:0", "listen address")
 	ready := flag.String("ready", "", "file that receives the base URL once listening")
@@ -46,6 +48,11 @@ func main() {
 		"app/mod/show-dotfiles/mod.js":   "y",
 		"app/run.sh":                     "z",
 	})
+
+	// The store itself: its "running" image is built from selfCommit (the
+	// browser tests start the store with CASAMOD_STORE_COMMIT set to it).
+	gh.Push("NescauQuente/CasaMOD-Store", "main", "store", map[string]string{"go.mod": "module x"})
+	gh.AddRun("NescauQuente/CasaMOD-Store", "docker-publish.yml", "main", selfCommit)
 
 	l, err := net.Listen("tcp", *addr)
 	if err != nil {

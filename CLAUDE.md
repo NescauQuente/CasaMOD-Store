@@ -18,6 +18,9 @@ wallpapers from GitHub, with a web UI and a notifier mini-mod. See README.md.
   dot folders, ignored by CasaMOD's `mod/*` glob).
 - `internal/notifier/files`: the mini-mod; its texts cover the 31 CasaOS
   languages (`src/assets/lang` of CasaOS-UI, lowercase keys like `pt_br`).
+- `internal/app/self.go`: "new version of the store" check (build commit via
+  `-X main.commit`, compared with the last successful `docker-publish.yml`
+  run on `main`; work goes straight to `main`).
 - `web/static`: plain HTML/CSS/JS, embedded; texts in `en` and `pt`.
 
 ## Tests

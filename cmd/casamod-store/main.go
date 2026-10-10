@@ -17,8 +17,12 @@ import (
 	"github.com/nescauquente/casamod-store/web"
 )
 
-// version is set at build time with -ldflags "-X main.version=...".
-var version = "dev"
+// version and commit are set at build time with
+// -ldflags "-X main.version=... -X main.commit=...".
+var (
+	version = "dev"
+	commit  = ""
+)
 
 func env(key, def string) string {
 	if v := os.Getenv(key); v != "" {
@@ -35,6 +39,7 @@ func main() {
 		CasaMODDir:   env("CASAMOD_DIR", "/DATA/AppData/casamod"),
 		DockerSocket: env("DOCKER_SOCKET", "/var/run/docker.sock"),
 		Version:      version,
+		Commit:       env("CASAMOD_STORE_COMMIT", commit), // env: test hook
 		RestartDelay: time.Duration(delay * float64(time.Second)),
 	})
 	if err != nil {

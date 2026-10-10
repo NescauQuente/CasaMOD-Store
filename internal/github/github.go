@@ -281,6 +281,30 @@ func (c *Client) Fetch(ctx context.Context, rawURL string, limit int64) ([]byte,
 	return readLimited(resp.Body, limit)
 }
 
+// LatestSuccessfulRun returns the commit of the most recent successful run of
+// a workflow on a branch (used to know which image was published last).
+func (c *Client) LatestSuccessfulRun(ctx context.Context, repo, workflow, branch string) (Commit, error) {
+	q := url.Values{}
+	q.Set("branch", branch)
+	q.Set("status", "success")
+	q.Set("per_page", "1")
+	var out struct {
+		Runs []struct {
+			HeadSHA   string    `json:"head_sha"`
+			UpdatedAt time.Time `json:"updated_at"`
+			Title     string    `json:"display_title"`
+		} `json:"workflow_runs"`
+	}
+	if err := c.getJSON(ctx, c.APIBase+"/repos/"+repo+"/actions/workflows/"+url.PathEscape(workflow)+"/runs?"+q.Encode(), &out); err != nil {
+		return Commit{}, err
+	}
+	if len(out.Runs) == 0 {
+		return Commit{}, ErrNotFound
+	}
+	r := out.Runs[0]
+	return Commit{SHA: r.HeadSHA, Date: r.UpdatedAt, Message: r.Title}, nil
+}
+
 // TreeEntry is one entry of a recursive git tree listing.
 type TreeEntry struct {
 	Path string `json:"path"`

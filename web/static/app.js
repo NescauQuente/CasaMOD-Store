@@ -41,6 +41,9 @@
       "url.id": "Folder name (id)", "url.type": "Type", "url.policy": "Updates",
       "banner.pending": "CasaMOD will restart in a moment to load the new mods. Reload CasaOS afterwards.",
       "banner.needed": "CasaMOD must be restarted to load the changes: {error}",
+      "self.banner": "A new version of CasaMOD Store is available. Update it in CasaOS: on the app icon open the menu (⋮) and choose \"Check then update\".",
+      "self.name": "CasaMOD Store (this app)", "self.changes": "What changed",
+      "self.row": "Running {current}, newest image {latest} from {date}. Update it from the app menu in CasaOS.",
       "banner.noDocker": "The Docker socket is not mounted: after adding or removing mods, restart the CasaMOD app yourself.",
       "banner.restart": "Restart now", "banner.restarted": "CasaMOD restarted. Reload the CasaOS page.",
       "confirm.remove": "Remove {name}?", "done.installed": "Installed {name}.", "done.updated": "Updated {name}.",
@@ -85,6 +88,9 @@
       "url.id": "Nome da pasta (id)", "url.type": "Tipo", "url.policy": "Atualizações",
       "banner.pending": "O CasaMOD vai reiniciar em instantes para carregar os novos mods. Depois recarregue o CasaOS.",
       "banner.needed": "É preciso reiniciar o CasaMOD para carregar as mudanças: {error}",
+      "self.banner": "Há uma versão nova do CasaMOD Store. Atualize pelo CasaOS: no ícone do app, abra o menu (⋮) e escolha \"Verificar e atualizar\".",
+      "self.name": "CasaMOD Store (este app)", "self.changes": "O que mudou",
+      "self.row": "Rodando {current}, imagem mais nova {latest} de {date}. Atualize pelo menu do app no CasaOS.",
       "banner.noDocker": "O socket do Docker não está montado: depois de adicionar ou remover mods, reinicie o app CasaMOD você mesmo.",
       "banner.restart": "Reiniciar agora", "banner.restarted": "CasaMOD reiniciado. Recarregue a página do CasaOS.",
       "confirm.remove": "Remover {name}?", "done.installed": "{name} instalado.", "done.updated": "{name} atualizado.",
@@ -240,6 +246,7 @@
     $("version").textContent = /^v?\d/.test(state.version || "") ? "v" + state.version.replace(/^v/, "") : (state.version || "");
     var updates = state.installed.filter(function (i) { return i.has_update; }).length;
     $("count-installed").textContent = state.installed.length || "";
+    if (selfUpdate()) updates++;
     $("count-updates").textContent = updates || "";
     renderBusy();
     renderBanners();
@@ -255,9 +262,22 @@
     $("busy-text").textContent = text || "…";
   }
 
+  function selfUpdate() { return state.self && state.self.has_update ? state.self : null; }
+
+  function selfChangesURL(s) {
+    return "https://github.com/NescauQuente/CasaMOD-Store/compare/" + s.commit + "..." + s.latest_sha;
+  }
+
   function renderBanners() {
     var box = $("banners");
     box.textContent = "";
+    var self = selfUpdate();
+    if (self) {
+      box.appendChild(el("div", { class: "banner info", id: "banner-self" }, [
+        el("span", { text: t("self.banner") }),
+        el("a", { href: selfChangesURL(self), target: "_blank", rel: "noopener", text: t("self.changes") + " ↗" })
+      ]));
+    }
     var r = state.restart || {};
     if (r.pending) {
       box.appendChild(el("div", { class: "banner info", id: "banner-pending" }, [el("span", { text: t("banner.pending") })]));
@@ -440,8 +460,20 @@
     var list = $("updates-list");
     list.textContent = "";
     var ups = state.installed.filter(function (i) { return i.has_update || i.missing; });
+    var self = selfUpdate();
+    if (self) {
+      list.appendChild(el("div", { class: "row-item", dataset: { key: "store:casamod-store" } }, [
+        el("div", { class: "info" }, [
+          el("div", { class: "name" }, [t("self.name"), el("span", { class: "badge accent", text: t("state.update") })]),
+          el("div", { class: "sub", text: t("self.row", { current: short(self.commit), latest: short(self.latest_sha), date: fmtDate(self.latest_date) }) })
+        ]),
+        el("div", { class: "controls" }, [
+          el("a", { class: "btn small", href: selfChangesURL(self), target: "_blank", rel: "noopener", text: t("self.changes") + " ↗" })
+        ])
+      ]));
+    }
     ups.forEach(function (it) { list.appendChild(installedRow(it, true)); });
-    $("updates-empty").hidden = ups.length > 0;
+    $("updates-empty").hidden = ups.length > 0 || !!self;
     $("btn-update-all").disabled = !state.installed.some(function (i) { return i.has_update; });
     var info = state.last_check ? t("updates.last", { when: fmtDate(state.last_check) }) : t("updates.never");
     if (state.config.check_interval_hours > 0) {

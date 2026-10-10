@@ -87,6 +87,14 @@ func (it *Installed) HasUpdate() bool {
 // Key builds an item key.
 func Key(typ, id string) string { return typ + ":" + id }
 
+// SelfUpdate is the newest published image of the store itself.
+type SelfUpdate struct {
+	LatestSHA  string    `json:"latest_sha,omitempty"`
+	LatestDate time.Time `json:"latest_date,omitempty"`
+	CheckedAt  time.Time `json:"checked_at,omitempty"`
+	LastError  string    `json:"last_error,omitempty"`
+}
+
 // State is everything saved on disk.
 type State struct {
 	mu        sync.Mutex
@@ -94,10 +102,12 @@ type State struct {
 	Config    Config
 	Items     map[string]*Installed
 	LastCheck time.Time
+	Self      SelfUpdate
 }
 
 type installedFile struct {
 	LastCheck time.Time    `json:"last_check,omitempty"`
+	Self      SelfUpdate   `json:"self"`
 	Items     []*Installed `json:"items"`
 }
 
@@ -115,6 +125,7 @@ func Load(dir string) (*State, error) {
 		return nil, err
 	}
 	s.LastCheck = inst.LastCheck
+	s.Self = inst.Self
 	for _, it := range inst.Items {
 		if it.Policy != PolicyAuto {
 			it.Policy = PolicyNotify
@@ -144,7 +155,7 @@ func (s *State) SaveLocked() error {
 	if err := writeJSON(filepath.Join(s.dir, "config.json"), s.Config, 0o600); err != nil {
 		return err
 	}
-	return writeJSON(filepath.Join(s.dir, "installed.json"), installedFile{LastCheck: s.LastCheck, Items: s.SortedLocked()}, 0o644)
+	return writeJSON(filepath.Join(s.dir, "installed.json"), installedFile{LastCheck: s.LastCheck, Self: s.Self, Items: s.SortedLocked()}, 0o644)
 }
 
 // SortedLocked returns the items sorted by type and name.

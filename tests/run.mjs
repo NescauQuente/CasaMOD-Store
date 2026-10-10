@@ -90,6 +90,7 @@ const store = spawn(join(bin, "casamod-store"), [], {
     CASAMOD_DIR: casamodDir,
     DOCKER_SOCKET: dockerSock,
     CASAMOD_STORE_RESTART_DELAY: "0.3",
+    CASAMOD_STORE_COMMIT: "1111111111111111111111111111111111111111",
     GITHUB_API_URL: GH + "/api",
     GITHUB_CODELOAD_URL: GH + "/codeload",
     GITHUB_RAW_URL: GH + "/raw",
@@ -331,6 +332,27 @@ try {
     await casa.reload();
     await sleep(500);
     assert.equal(await casa.eval(`!!document.getElementById("casamod-store-notifier")`), false);
+  });
+
+  await test("store announces a new version of itself (UI and notifier)", async () => {
+    await page.goto(STORE + "/?lang=pt#updates");
+    await page.waitFor(`document.getElementById("updates-empty").hidden === false`);
+    assert.equal(await page.eval(`!!document.getElementById("banner-self")`), false);
+    const r = await fetch(GH + "/__run", { method: "POST", body: JSON.stringify({
+      repo: "NescauQuente/CasaMOD-Store", workflow: "docker-publish.yml", branch: "main", sha: "2222222222222222222222222222222222222222" }) });
+    assert.ok(r.ok);
+    await page.click("#btn-check");
+    await page.waitFor(`!!document.getElementById("banner-self")`, { message: "self banner" });
+    assert.match(await page.text("#banner-self"), /Verificar e atualizar/);
+    assert.equal(await page.eval(`document.querySelector("#banner-self a").href`),
+      "https://github.com/NescauQuente/CasaMOD-Store/compare/1111111111111111111111111111111111111111...2222222222222222222222222222222222222222");
+    assert.match(await page.text('#updates-list [data-key="store:casamod-store"]'), /Rodando 1111111, imagem mais nova 2222222/);
+    assert.equal(await page.text("#count-updates"), "1");
+    await shot("05b-self-update");
+    await casa.reload();
+    await casa.waitFor(`!!document.getElementById("casamod-store-notifier")`, { message: "notifier for self update" });
+    assert.equal(await casa.text(".casamod-store-notifier-text"), "Updates available: 1");
+    assert.match(await casa.eval(`document.getElementById("casamod-store-notifier").title`), /CasaMOD Store/);
   });
 
   await test("remove a mod restarts CasaMOD; manual folders stay", async () => {

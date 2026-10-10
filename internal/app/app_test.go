@@ -449,3 +449,49 @@ func TestHTTPGuardAndAPI(t *testing.T) {
 		t.Fatalf("index: %d", resp.StatusCode)
 	}
 }
+
+func TestSelfUpdate(t *testing.T) {
+	e := setup(t)
+	ctx := context.Background()
+	e.app.EnsureNotifier()
+	statusItems := func() []notifier.StatusItem {
+		var st notifier.Status
+		json.Unmarshal([]byte(readFile(t, filepath.Join(e.modDir, notifier.ID, notifier.StatusFile))), &st)
+		return st.Items
+	}
+
+	// Local builds (no commit) never look for a new version.
+	e.app.Check(ctx)
+	if n := e.gh.Count("/api/repos/" + SelfRepo); n != 0 {
+		t.Fatalf("dev build queried GitHub %d times", n)
+	}
+
+	e.app.Commit = "aaa"
+	e.gh.Push(SelfRepo, "main", "init", map[string]string{"go.mod": "x"})
+	e.gh.AddRun(SelfRepo, SelfWorkflow, SelfBranch, "aaa")
+	e.app.Check(ctx)
+	if v := e.app.selfViewLocked(); v.HasUpdate || v.LatestSHA != "aaa" {
+		t.Fatalf("running the newest image: %+v", v)
+	}
+	// Runs on other branches do not count.
+	e.gh.AddRun(SelfRepo, SelfWorkflow, "dev", "ccc")
+	e.gh.AddRun(SelfRepo, SelfWorkflow, SelfBranch, "bbb")
+	e.app.Check(ctx)
+	if v := e.app.selfViewLocked(); !v.HasUpdate || v.LatestSHA != "bbb" {
+		t.Fatalf("new image not detected: %+v", v)
+	}
+	if items := statusItems(); len(items) != 1 || items[0].Type != "store" || items[0].Latest != "bbb" {
+		t.Fatalf("notifier status: %+v", items)
+	}
+	// Survives a restart of the store.
+	re, err := store.Load(e.app.State.Dir())
+	if err != nil || re.Self.LatestSHA != "bbb" {
+		t.Fatalf("self state not saved: %+v %v", re.Self, err)
+	}
+	// After the container is updated the notice goes away.
+	e.app.Commit = "bbb"
+	e.app.Check(ctx)
+	if e.app.selfViewLocked().HasUpdate || len(statusItems()) != 0 {
+		t.Fatal("update still reported after updating")
+	}
+}
